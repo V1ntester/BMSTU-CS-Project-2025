@@ -19,12 +19,12 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v4
         with:
-          source-path: backend/source/
+          path: backend/
 
       - name: Build project and run clang-tidy
         uses: threeal/cmake-action@v2
         with:
-          source-path: backend/source/
+          source-dir: backend/source/
 
   clang-format:
     runs-on: ubuntu-latest
@@ -36,11 +36,11 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@v4
         with:
-          source-path: backend/source
+          path: backend
 
       - name: Run clang-format only
         uses: threeal/cmake-action@v2
         with:
-          source-path: backend/source/
+          source-dir: backend/source/
           build-args: |
             --target clang-format
