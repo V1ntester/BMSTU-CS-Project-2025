@@ -1,4 +1,9 @@
-on: push
+name: frontend
+
+on:
+  push:
+    paths:
+      - frontend/**
 
 jobs:
   prettier:
@@ -7,6 +12,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          source-path: frontend/source/
 
       - name: Prettify code
         uses: creyD/prettier_action@v4.3
+        with:
+          source-path: frontend/source/
