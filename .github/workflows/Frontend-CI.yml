@@ -8,10 +8,19 @@ on:
 jobs:
   prettier:
     runs-on: ubuntu-latest
+    container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-      - run: |
-          yarn
-          yarn prettier frontend/source/ --check
-      - uses: autofix-ci/action@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install Prettier
+        run: npm install -g prettier
+
+      - name: Run Prettier
+        run: prettier --check "frontend/source/**/*.{js,jsx,ts,tsx,css,scss,json,md}"
+        working-directory: /frontend/source/
