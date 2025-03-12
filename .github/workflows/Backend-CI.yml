@@ -18,8 +18,6 @@ jobs:
 
       - name: Checkout project
         uses: actions/checkout@v4
-        with:
-          path: backend/
 
       - name: Build project and run clang-tidy
         uses: threeal/cmake-action@v2
