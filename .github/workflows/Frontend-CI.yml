@@ -16,7 +16,6 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Prettify code
-        uses: creyD/prettier_action@v4.3
+        uses: prettier/action@v1
         with:
-          dry: True
-          #working_directory: frontend/source/
+          working_directory: frontend/source/
