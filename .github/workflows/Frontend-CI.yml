@@ -12,8 +12,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Prettify code
         uses: creyD/prettier_action@v4.3
         with:
-          source-dir: frontend/source/
+          working-directory: frontend/source/
