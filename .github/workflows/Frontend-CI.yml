@@ -8,14 +8,10 @@ on:
 jobs:
   prettier:
     runs-on: ubuntu-latest
-    container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Prettify code
-        uses: prettier/action@v1
-        with:
-          working_directory: frontend/source/
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: |
+          yarn
+          yarn prettier frontend/source/ --check
+      - uses: autofix-ci/action@v1
