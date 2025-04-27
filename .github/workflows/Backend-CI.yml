@@ -20,7 +20,7 @@ jobs:
         uses: MarkusJx/install-boost@v2
         id: install-boost
         with:
-          boost_version: default
+          boost_version: 1.88.0
 
       - name: Checkout project
         uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         uses: MarkusJx/install-boost@v2
         id: install-boost
         with:
-          boost_version: default
+          boost_version: 1.88.0
       
       - name: Checkout project
         uses: actions/checkout@v4
@@ -60,4 +60,5 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6.6.0
         with:
+          context: backend/
           file: backend/Dockerfile

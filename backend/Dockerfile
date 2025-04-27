@@ -5,8 +5,8 @@ RUN apt-get update && \
     cmake \
     clang-tidy \
     clang-format \
-    libboost-dev \
-    libboost-system-dev
+    libboost1.88-dev \
+    libboost1.88-system-dev
 
 COPY /source /app/source
 
