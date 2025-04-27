@@ -31,5 +31,3 @@ jobs:
 
       - name: Build and push
         uses: docker/build-push-action@v6.6.0
-        with:
-          context: backend/
