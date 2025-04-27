@@ -6,6 +6,28 @@ on:
       - backend/**
 
 jobs:
+  build-and-clang-tidy:
+    runs-on: ubuntu-latest
+    container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
+    steps:
+      - name: Setup clang-tidy
+        run: apt install -y clang-tidy
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v2
+
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2
+        id: install-boost
+        with:
+          boost_version: default
+
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Build project and run clang-tidy
+        uses: threeal/cmake-action@v2
+
   clang-format:
     runs-on: ubuntu-latest
     container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
@@ -13,6 +35,12 @@ jobs:
       - name: Setup CMake
         uses: jwlawson/actions-setup-cmake@v2
 
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2
+        id: install-boost
+        with:
+          boost_version: default
+      
       - name: Checkout project
         uses: actions/checkout@v4
 
@@ -32,4 +60,4 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6.6.0
         with:
-          context: backend/
+          file: backend/Dockerfile
