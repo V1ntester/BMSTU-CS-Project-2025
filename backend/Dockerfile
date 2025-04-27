@@ -8,7 +8,7 @@ RUN apt-get install -y software-properties-common && \
     clang-tidy \
     clang-format \
     libboost1.87-dev \
-    libboost-system187-dev
+    libboost-system1.87-dev
 
 COPY /source /app/source
 
