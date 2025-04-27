@@ -1,12 +1,14 @@
 FROM gcc:latest AS build
 
-RUN apt-get update && \
+RUN apt-get install -y software-properties-common && \
+    add-apt-repository ppa:mhier/libboost-latest -y && \
+    apt-get update && \
     apt-get install -y \
     cmake \
     clang-tidy \
     clang-format \
     libboost1.87-dev \
-    libboost-system1.87-dev
+    libboost-system187-dev
 
 COPY /source /app/source
 
