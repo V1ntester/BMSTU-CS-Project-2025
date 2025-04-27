@@ -49,7 +49,7 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
-    # needs: [build-and-clang-tidy, clang-format]
+    needs: [build-and-clang-tidy, clang-format]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
