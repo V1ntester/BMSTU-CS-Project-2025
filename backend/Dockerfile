@@ -1,9 +1,9 @@
 FROM gcc:latest AS build
 
-RUN apt-get install -y software-properties-common && \
-    add-apt-repository ppa:mhier/libboost-latest -y && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:mhier/libboost-latest -y && \
     cmake \
     clang-tidy \
     clang-format \
