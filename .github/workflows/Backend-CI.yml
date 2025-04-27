@@ -20,7 +20,13 @@ jobs:
         uses: MarkusJx/install-boost@v2
         id: install-boost
         with:
+          boost_install_dir: /opt/boost
           boost_version: 1.87.0
+      
+      - name: Configure environment
+        run: |
+          echo "BOOST_ROOT=/opt/boost" >> $GITHUB_ENV
+          echo "Boost_DIR=/opt/boost/lib/cmake/Boost-1.87.0" >> $GITHUB_ENV
 
       - name: Checkout project
         uses: actions/checkout@v4
@@ -39,8 +45,14 @@ jobs:
         uses: MarkusJx/install-boost@v2
         id: install-boost
         with:
+          boost_install_dir: /opt/boost
           boost_version: 1.87.0
       
+      - name: Configure environment
+        run: |
+          echo "BOOST_ROOT=/opt/boost" >> $GITHUB_ENV
+          echo "Boost_DIR=/opt/boost/lib/cmake/Boost-1.87.0" >> $GITHUB_ENV
+
       - name: Checkout project
         uses: actions/checkout@v4
 
