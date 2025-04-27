@@ -14,7 +14,7 @@ set(HEADERS
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 
-find_package(Boost 1.88 REQUIRED COMPONENTS system)
+find_package(Boost 1.87 REQUIRED COMPONENTS system)
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(${project} ${SOURCES} ${HEADERS})
