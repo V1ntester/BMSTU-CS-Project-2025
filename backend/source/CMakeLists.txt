@@ -8,13 +8,14 @@ set(SOURCES
 )
 
 set(HEADERS
-    # ${CMAKE_CURRENT_SOURCE_DIR}/Handler.h
-    # ${CMAKE_CURRENT_SOURCE_DIR}/DataBase.h
-    # ${CMAKE_CURRENT_SOURCE_DIR}/List.h
+    
 )
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+
+find_package(Boost REQUIRED COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(${project} ${SOURCES} ${HEADERS})
 target_compile_options(${project} PRIVATE -Wall -Wextra -Werror -Wpedantic)
@@ -28,6 +29,6 @@ add_custom_target(
     COMMAND clang-format
     --dry-run
     -Werror
-    # ${SOURCES}
+    ${SOURCES}
     ${HEADERS}
 )

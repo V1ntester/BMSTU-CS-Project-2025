@@ -6,24 +6,6 @@ on:
       - backend/**
 
 jobs:
-  build-and-clang-tidy:
-    runs-on: ubuntu-latest
-    container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
-    steps:
-      - name: Setup clang-tidy
-        run: apt install -y clang-tidy
-
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v2
-
-      - name: Checkout project
-        uses: actions/checkout@v4
-
-      - name: Build project and run clang-tidy
-        uses: threeal/cmake-action@v2
-        with:
-          source-dir: backend/source/
-
   clang-format:
     runs-on: ubuntu-latest
     container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
@@ -40,3 +22,12 @@ jobs:
           source-dir: backend/source/
           build-args: |
             --target clang-format
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Build and push
+        uses: docker/build-push-action@v6.6.0

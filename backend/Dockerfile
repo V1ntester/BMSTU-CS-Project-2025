@@ -1,10 +1,14 @@
-FROM gcc::latest as build
+FROM gcc:latest AS build
 
 RUN apt-get update && \
     apt-get install -y \
-    cmake
+    cmake \
+    clang-tidy \
+    clang-format \
+    libboost-dev \
+    libboost-system-dev
 
-ADD ./source /app/source
+COPY /source /app/source
 
 WORKDIR /app/build
 
