@@ -17,22 +17,15 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v2
 
       - name: Install boost
-        uses: MarkusJx/install-boost@v2
-        id: install-boost
-        with:
-          boost_install_dir: /opt/boost
-          boost_version: 1.87.0
-      
-      - name: Configure environment
-        run: |
-          echo "BOOST_ROOT=/opt/boost" >> $GITHUB_ENV
-          echo "Boost_DIR=/opt/boost/lib/cmake/Boost-1.87.0" >> $GITHUB_ENV
+        run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
 
       - name: Checkout project
         uses: actions/checkout@v4
 
       - name: Build project and run clang-tidy
         uses: threeal/cmake-action@v2
+        with:
+          source-dir: backend/source/
 
   clang-format:
     runs-on: ubuntu-latest
@@ -42,16 +35,7 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v2
 
       - name: Install boost
-        uses: MarkusJx/install-boost@v2
-        id: install-boost
-        with:
-          boost_install_dir: /opt/boost
-          boost_version: 1.87.0
-      
-      - name: Configure environment
-        run: |
-          echo "BOOST_ROOT=/opt/boost" >> $GITHUB_ENV
-          echo "Boost_DIR=/opt/boost/lib/cmake/Boost-1.87.0" >> $GITHUB_ENV
+        run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
 
       - name: Checkout project
         uses: actions/checkout@v4
@@ -65,10 +49,8 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
+    needs: [build-and-clang-tidy, clang-format]
     steps:
-      - name: Checkout project
-        uses: actions/checkout@v4
-
       - name: Build and push
         uses: docker/build-push-action@v6.6.0
         with:
