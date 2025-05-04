@@ -16,7 +16,7 @@ WORKDIR /app/build
 RUN cmake ../source && \
     cmake --build .
 
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 WORKDIR /app
 
@@ -24,8 +24,6 @@ COPY --from=build /app/build/main .
 
 RUN apt-get update && \
     apt-get install -y \
-    libboost1.74-dev \
-    libboost-system1.74-dev \
-    nlohmann-json3-dev=3.11.2-2
+    libboost-system1.74.0
 
 ENTRYPOINT [ "./main" ]
