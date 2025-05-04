@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.16)
 
 set(project "main")
 
@@ -44,7 +44,7 @@ set(HEADERS
 )
 
 find_package(Boost 1.74 REQUIRED COMPONENTS system)
-find_package(nlohmann_json REQUIRED)
+find_package(nlohmann_json 3.10.5 REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
