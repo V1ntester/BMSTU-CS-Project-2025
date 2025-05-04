@@ -13,10 +13,10 @@ COPY /source /app/source
 
 WORKDIR /app/build
 
-RUN cmake ../source -DCMAKE_CXX_FLAGS="-pthread" && \
+RUN cmake ../source && \
     cmake --build .
 
-FROM ubuntu:20.04
+FROM ubuntu:latest
 
 WORKDIR /app
 
