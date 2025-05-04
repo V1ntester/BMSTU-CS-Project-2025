@@ -58,7 +58,7 @@ void Session::Write(http::response<http::string_body> response) {
 
     http::async_write(this->socket, *responsePointer, [self, responsePointer](beast::error_code errorCode, size_t) {
         self->writeTimer.cancel();
-
+        
         self->socket.shutdown(tcp::socket::shutdown_send, errorCode);
     });
 }
