@@ -1,4 +1,4 @@
-FROM gcc:latest AS build
+FROM gcc:11 AS build
 
 RUN apt-get update && \
     apt-get install -y \
@@ -24,6 +24,7 @@ COPY --from=build /app/build/main .
 
 RUN apt-get update && \
     apt-get install -y \
-    libboost-system1.74.0
+    libboost-system1.74.0 \
+    libboost-filesystem1.74.0
 
 ENTRYPOINT [ "./main" ]
