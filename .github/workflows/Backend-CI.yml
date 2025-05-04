@@ -19,6 +19,9 @@ jobs:
       - name: Install boost
         run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
 
+      - name: Install nlohmann-json
+        run: apt-get install -y nlohmann-json3-dev=3.11.3-1
+
       - name: Checkout project
         uses: actions/checkout@v4
 
@@ -36,6 +39,9 @@ jobs:
 
       - name: Install boost
         run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
+
+      - name: Install nlohmann-json
+        run: apt-get install -y nlohmann-json3-dev=3.11.3-1
 
       - name: Checkout project
         uses: actions/checkout@v4
