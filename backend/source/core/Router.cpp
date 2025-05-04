@@ -1,7 +1,7 @@
 #include "Router.hpp"
 
-#include <memory>
 #include <iostream>
+#include <memory>
 #include "../default/web/Routes.hpp"
 #include "factories/ResponseFactory.hpp"
 

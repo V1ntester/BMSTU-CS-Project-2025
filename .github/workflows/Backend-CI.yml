@@ -21,13 +21,9 @@ jobs:
 
       - name: Install nlohmann-json
         run: | 
-          apt-get update
-          apt-get install -y cmake git
-          git clone --branch v3.11.3 https://github.com/nlohmann/json.git
-          cd json
-          mkdir build && cd build
-          cmake ..
-          make install
+          wget http://ftp.debian.org/debian/pool/main/n/nlohmann-json/nlohmann-json3-dev_3.11.3-1_all.deb
+          sudo dpkg -i nlohmann-json3-dev_3.11.3-1_all.deb
+          sudo apt-get install -f
 
       - name: Checkout project
         uses: actions/checkout@v4
@@ -49,13 +45,9 @@ jobs:
 
       - name: Install nlohmann-json
         run: | 
-            apt-get update
-            apt-get install -y cmake git
-            git clone --branch v3.11.3 https://github.com/nlohmann/json.git
-            cd json
-            mkdir build && cd build
-            cmake ..
-            make install
+          wget http://ftp.debian.org/debian/pool/main/n/nlohmann-json/nlohmann-json3-dev_3.11.3-1_all.deb
+          sudo dpkg -i nlohmann-json3-dev_3.11.3-1_all.deb
+          sudo apt-get install -f
 
       - name: Checkout project
         uses: actions/checkout@v4
