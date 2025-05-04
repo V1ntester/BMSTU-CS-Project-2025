@@ -44,7 +44,7 @@ set(HEADERS
 )
 
 find_package(Boost 1.74 REQUIRED COMPONENTS system)
-find_package(nlohmann_json 3.11.3 REQUIRED)
+find_package(nlohmann_json 3.10.5 REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
