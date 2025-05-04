@@ -40,7 +40,7 @@ Router::Router() {
 Router::~Router() = default;
 
 http::response<http::string_body> Router::Route(const http::request<http::string_body>& request) {
-    std::string url = request.target();
+    std::string url(request.target().data(), request.target().size());
     http::verb method = request.method();
 
     Web::Routes::Function function = this->Find(method, url);
