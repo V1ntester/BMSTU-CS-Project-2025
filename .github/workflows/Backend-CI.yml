@@ -38,7 +38,7 @@ jobs:
         uses: jwlawson/actions-setup-cmake@v2
 
       - name: Install boost
-        run: sudo apt-get install -y libboost1.74-dev libboost-system1.74-dev
+        run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
 
       - name: Install nlohmann-json
         run: apt-get install -y nlohmann-json3-dev=3.10.5
