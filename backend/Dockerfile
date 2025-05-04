@@ -1,4 +1,4 @@
-FROM gcc:9 AS build
+FROM gcc:latest AS build
 
 RUN apt-get update && \
     apt-get install -y \
@@ -7,13 +7,13 @@ RUN apt-get update && \
     clang-format \
     libboost1.74-dev \
     libboost-system1.74-dev \
-    nlohmann-json3-dev
+    nlohmann-json3-dev=3.11.2-2
 
 COPY /source /app/source
 
 WORKDIR /app/build
 
-RUN cmake ../source && \
+RUN cmake ../source -DCMAKE_CXX_FLAGS="-pthread" && \
     cmake --build .
 
 FROM ubuntu:20.04
