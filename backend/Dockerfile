@@ -6,7 +6,8 @@ RUN apt-get update && \
     clang-tidy \
     clang-format \
     libboost1.74-dev \
-    libboost-system1.74-dev
+    libboost-system1.74-dev \
+    nlohmann-json3-dev=3.11.3-1
 
 COPY /source /app/source
 

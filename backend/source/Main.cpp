@@ -1,8 +1,9 @@
-#include <boost/beast/core.hpp>
-#include <iostream>
+#include "Application.hpp"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
-    std::cout << "Hello World!\n";
+    Application application;
+
+    application.Run();
 
     return 0;
 }
