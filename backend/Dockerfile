@@ -7,7 +7,7 @@ RUN apt-get update && \
     clang-format \
     libboost1.74-dev \
     libboost-system1.74-dev \
-    nlohmann-json3-dev=3.10.5-2
+    nlohmann-json3-dev
 
 COPY /source /app/source
 
