@@ -3,6 +3,7 @@
 #include <boost/beast/http.hpp>
 #include <functional>
 #include <string>
+#include "../../storage/Manager.hpp"
 #include "../components/views/View.hpp"
 
 namespace http = boost::beast::http;
@@ -10,7 +11,7 @@ namespace http = boost::beast::http;
 namespace Web {
 namespace Routes {
 
-using Function = std::function<Components::View(const boost::beast::http::request<boost::beast::http::string_body>&)>;
+using Function = std::function<Components::View(const boost::beast::http::request<boost::beast::http::string_body>&, Storage::Manager& manager)>;
 
 class Route {
  public:

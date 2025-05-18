@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "../default/web/Routes.hpp"
+#include "../storage/Manager.hpp"
 
 namespace Core {
 namespace http = boost::beast::http;
@@ -19,6 +20,8 @@ class Router {
     http::response<http::string_body> Route(const http::request<http::string_body>& request);
 
  private:
+    Storage::Manager storageManager;
+
     std::unordered_map<std::string, Web::Routes::Function> getMethodMap;
     std::unordered_map<std::string, Web::Routes::Function> postMethodMap;
     std::unordered_map<std::string, Web::Routes::Function> putMethodMap;

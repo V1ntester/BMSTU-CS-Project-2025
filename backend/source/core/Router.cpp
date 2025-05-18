@@ -46,7 +46,7 @@ http::response<http::string_body> Router::Route(const http::request<http::string
     Web::Routes::Function function = this->Find(method, url);
     ResponseFactory ResponseFactory;
 
-    http::response<http::string_body> response = ResponseFactory.Make(function(request), request);
+    http::response<http::string_body> response = ResponseFactory.Make(function(request, this->storageManager), request);
 
     return response;
 }
@@ -81,9 +81,10 @@ Web::Routes::Function Router::Find(http::verb method, std::string url) {
             break;
     }
 
-    return []([[maybe_unused]] const http::request<http::string_body>& request) {
-        const std::string message = "Error 404";
+    return
+        []([[maybe_unused]] const http::request<http::string_body>& request, [[maybe_unused]] Storage::Manager& storageManager) -> Components::View {
+            const std::string message = "Error 404";
 
-        return Components::View(message);
-    };
+            return {message};
+        };
 }
