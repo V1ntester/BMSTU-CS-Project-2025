@@ -1,5 +1,6 @@
 #include "Manager.hpp"
 
+#include <boost/process/detail/traits.hpp>
 #include <boost/process/env.hpp>
 #include <iostream>
 #include <mutex>

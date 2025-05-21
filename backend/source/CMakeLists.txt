@@ -86,12 +86,7 @@ set(HEADERS
 find_package(Boost 1.74 REQUIRED COMPONENTS system)
 find_package(nlohmann_json 3.10.5 REQUIRED)
 find_package(PostgreSQL REQUIRED)
-
-## Bad practice
-find_package(libpqxx REQUIRED
-    PATHS "/usr/local/lib/cmake/libpqxx"
-    NO_DEFAULT_PATH
-)
+find_package(libpqxx REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -104,9 +99,7 @@ add_executable(${project} ${SOURCES} ${HEADERS})
 target_link_libraries(${project} PRIVATE Boost::system)
 target_link_libraries(${project} PRIVATE nlohmann_json::nlohmann_json)
 
-## Bad practice
-target_link_libraries(${project} PRIVATE /usr/local/lib/libpqxx.a)
-
+target_link_libraries(${project} PRIVATE pqxx)
 target_link_libraries(${project} PRIVATE PostgreSQL::PostgreSQL)
 
 # Add compile options 
@@ -126,7 +119,7 @@ endif()
 # Add custom target for Clang-Format
 
 add_custom_target(
-    clang-format
+    clang-format-check
     COMMAND clang-format
     --dry-run
     -Werror
