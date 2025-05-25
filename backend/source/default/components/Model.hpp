@@ -6,7 +6,7 @@
 namespace Components {
 class Model {
  public:
-    Model(Storage::Manager& storageManager);
+    explicit Model(Storage::Manager& storageManager);
 
     virtual ~Model();
 
