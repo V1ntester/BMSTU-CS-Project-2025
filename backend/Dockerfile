@@ -32,7 +32,7 @@ WORKDIR /app
 
 COPY --from=build /app/build/main .
 COPY --from=build /usr/local/lib/libpqxx* /usr/local/lib/
-COPY source/.env . 
+COPY source/.env .env
 
 RUN apt-get update && \
     apt-get install -y \
@@ -40,4 +40,5 @@ RUN apt-get update && \
     libboost-filesystem1.74.0 \
     libpq5
 
+EXPOSE 8080
 ENTRYPOINT [ "./main" ]
