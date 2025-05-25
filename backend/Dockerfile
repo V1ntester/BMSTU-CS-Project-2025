@@ -24,7 +24,7 @@ COPY /libpqxx /app/libpqxx
 
 WORKDIR /app/build
 
-RUN cmake ../source && \
+RUN cmake ../source -DCMAKE_PREFIX_PATH=/usr/local && \
     cmake --build .
 
 FROM ubuntu:latest
