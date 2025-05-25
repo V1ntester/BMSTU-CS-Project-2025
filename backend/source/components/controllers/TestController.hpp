@@ -6,7 +6,7 @@
 namespace Components {
 class TestController : public Contoller {
  public:
-    TestController(TestModel& testModel);
+    explicit TestController(TestModel& testModel);
 
     ~TestController() override;
 
