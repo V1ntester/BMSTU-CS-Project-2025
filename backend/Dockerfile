@@ -31,16 +31,11 @@ FROM ubuntu:latest
 WORKDIR /app
 
 COPY --from=build /app/build/main .
+COPY --from=build /usr/local/lib/libpqxx* /usr/local/lib/
 
 RUN apt-get update && \
     apt-get install -y \
     libboost-system1.74.0 \
-    libboost-filesystem1.74.0 \
-    git \
-    make \
-    cmake \
-    libpq-dev
-
-RUN cd libpqxx/build && make install
+    libboost-filesystem1.74.0
 
 ENTRYPOINT [ "./main" ]
