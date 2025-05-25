@@ -20,7 +20,6 @@ RUN cd libpqxx \
     make install 
 
 COPY /source /app/source
-COPY /libpqxx /app/libpqxx
 
 WORKDIR /app/build
 
