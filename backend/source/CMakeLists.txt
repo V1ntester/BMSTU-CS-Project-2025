@@ -13,11 +13,19 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 set(COMPONENTS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TestModel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TestController.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TaskModel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TaskController.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/UserModel.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/UserController.cpp
 )
 
 set(COMPONENTS_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TestModel.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TestController.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TaskModel.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TaskController.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/UserModel.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/UserController.hpp
 )
 
 ## Files for Core
