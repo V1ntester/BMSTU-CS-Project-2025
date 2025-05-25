@@ -1,44 +1,87 @@
 #include "TaskModel.hpp"
 #include <pqxx/pqxx>
+#include <stdexcept>
+#include <chrono>
 
 using namespace Components;
 
 TaskModel::TaskModel(Storage::Manager& storageManager)
-    : Model(storageManager)
-{
+    : Model(storageManager) {}
+
+void TaskModel::validateTask(const Task& task) const {
+    if (task.title.empty()) {
+        throw std::invalid_argument("Task title cannot be empty");
+    }
+    if (task.priority < 1 || task.priority > 3) {
+        throw std::invalid_argument("Priority must be between 1 and 3");
+    }
+    if (task.category < 1 || task.category > 3) {
+        throw std::invalid_argument("Category must be between 1 and 3");
+    }
+    if (task.estimated_minutes <= 0) {
+        throw std::invalid_argument("Estimated time must be positive");
+    }
 }
 
-std::vector<TaskModel::Task> TaskModel::getAllTasks() {
-    Storage::Session session(this->storageManager);
-    pqxx::work transaction(session.Get());
+void TaskModel::verifyTaskOwnership(int task_id, int user_id, pqxx::work& transaction) {
+    const std::string query =
+        "SELECT user_id FROM \"Tasks\" "
+        "WHERE id = " + std::to_string(task_id);
 
-    pqxx::result result = transaction.exec("SELECT * FROM \"Tasks\"");
+    pqxx::result result = transaction.exec(query);
 
-    std::vector<Task> tasks;
-    for (auto row : result) {
-        Task task;
-        task.id = row["id"].as<int>();
-        task.title = row["title"].as<std::string>();
-        task.description = row["description"].as<std::string>();
-        task.priority = row["priority"].as<int>();
-        task.category = row["category"].as<int>();
-        task.deadline = row["deadline"].as<std::string>();
-        task.estimated_minutes = row["estimated_minutes"].as<int>();
-        task.completed = row["completed"].as<bool>();
-        tasks.push_back(task);
+    if (result.empty()) {
+        throw std::runtime_error("Task not found");
     }
 
-    transaction.commit();
-    return tasks;
+    if (result[0]["user_id"].as<int>() != user_id) {
+        throw std::runtime_error("Unauthorized task access");
+    }
 }
 
-bool TaskModel::createTask(const Task& task) {
+std::vector<TaskModel::Task> TaskModel::getAllTasksForUser(int user_id) {
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
 
     try {
-        auto result = transaction.exec(
-            "INSERT INTO \"Tasks\" (title, description, priority, category, deadline, estimated_minutes, completed) "
+        const std::string query =
+            "SELECT * FROM \"Tasks\" "
+            "WHERE user_id = " + std::to_string(user_id);
+
+        pqxx::result result = transaction.exec(query);
+        std::vector<Task> tasks;
+
+        for (const auto& row : result) {
+            Task task;
+            task.id = row["id"].as<int>();
+            task.title = row["title"].as<std::string>();
+            task.description = row["description"].as<std::string>();
+            task.priority = row["priority"].as<int>();
+            task.category = row["category"].as<int>();
+            task.deadline = row["deadline"].as<std::string>();
+            task.estimated_minutes = row["estimated_minutes"].as<int>();
+            task.completed = row["completed"].as<bool>();
+            task.user_id = user_id;
+            tasks.push_back(task);
+        }
+
+        transaction.commit();
+        return tasks;
+    } catch (const std::exception& e) {
+        transaction.abort();
+        throw std::runtime_error("Failed to get tasks: " + std::string(e.what()));
+    }
+}
+
+bool TaskModel::createTaskForUser(const Task& task) {
+    validateTask(task);
+    Storage::Session session(this->storageManager);
+    pqxx::work transaction(session.Get());
+
+    try {
+        const std::string query =
+            "INSERT INTO \"Tasks\" "
+            "(title, description, priority, category, deadline, estimated_minutes, completed, user_id) "
             "VALUES (" +
             transaction.quote(task.title) + ", " +
             transaction.quote(task.description) + ", " +
@@ -46,23 +89,27 @@ bool TaskModel::createTask(const Task& task) {
             std::to_string(task.category) + ", " +
             transaction.quote(task.deadline) + ", " +
             std::to_string(task.estimated_minutes) + ", " +
-            (task.completed ? "TRUE" : "FALSE") +
-            ") RETURNING id"
-        );
+            (task.completed ? "TRUE" : "FALSE") + ", " +
+            std::to_string(task.user_id) + ") RETURNING id";
+
+        pqxx::result result = transaction.exec(query);
         transaction.commit();
         return !result.empty();
     } catch (const std::exception& e) {
         transaction.abort();
-        return false;
+        throw std::runtime_error("Task creation failed: " + std::string(e.what()));
     }
 }
 
-bool TaskModel::updateTask(const Task& task) {
+bool TaskModel::updateTaskForUser(const Task& task) {
+    validateTask(task);
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
 
     try {
-        auto result = transaction.exec(
+        verifyTaskOwnership(task.id, task.user_id, transaction);
+
+        const std::string query =
             "UPDATE \"Tasks\" SET "
             "title = " + transaction.quote(task.title) + ", " +
             "description = " + transaction.quote(task.description) + ", " +
@@ -72,51 +119,112 @@ bool TaskModel::updateTask(const Task& task) {
             "estimated_minutes = " + std::to_string(task.estimated_minutes) + ", " +
             "completed = " + (task.completed ? "TRUE" : "FALSE") + " " +
             "WHERE id = " + std::to_string(task.id) + " " +
-            "RETURNING id"
-        );
+            "RETURNING id";
+
+        pqxx::result result = transaction.exec(query);
         transaction.commit();
         return !result.empty();
     } catch (const std::exception& e) {
         transaction.abort();
-        return false;
+        throw std::runtime_error("Task update failed: " + std::string(e.what()));
     }
 }
 
-bool TaskModel::deleteTask(int task_id) {
+bool TaskModel::deleteTaskForUser(int task_id, int user_id) {
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
 
     try {
-        auto result = transaction.exec(
-            "DELETE FROM \"Tasks\" WHERE id = " + std::to_string(task_id) + " " +
-            "RETURNING id"
-        );
+        verifyTaskOwnership(task_id, user_id, transaction);
+
+        const std::string query =
+            "DELETE FROM \"Tasks\" "
+            "WHERE id = " + std::to_string(task_id) + " " +
+            "RETURNING id";
+
+        pqxx::result result = transaction.exec(query);
         transaction.commit();
         return !result.empty();
     } catch (const std::exception& e) {
         transaction.abort();
-        return false;
+        throw std::runtime_error("Task deletion failed: " + std::string(e.what()));
     }
 }
 
-std::vector<TaskModel::Task> TaskModel::getTasksByPriority(int priority) {
-    auto all_tasks = getAllTasks();
-    std::vector<Task> filtered_tasks;
-    for (const auto& task : all_tasks) {
-        if (task.priority == priority) {
-            filtered_tasks.push_back(task);
-        }
+std::vector<TaskModel::Task> TaskModel::getTasksByPriorityForUser(int priority, int user_id) {
+    if (priority < 1 || priority > 3) {
+        throw std::invalid_argument("Priority must be between 1 and 3");
     }
-    return filtered_tasks;
+
+    Storage::Session session(this->storageManager);
+    pqxx::work transaction(session.Get());
+
+    try {
+        const std::string query =
+            "SELECT * FROM \"Tasks\" "
+            "WHERE priority = " + std::to_string(priority) + " " +
+            "AND user_id = " + std::to_string(user_id);
+
+        pqxx::result result = transaction.exec(query);
+        std::vector<Task> tasks;
+
+        for (const auto& row : result) {
+            Task task;
+            task.id = row["id"].as<int>();
+            task.title = row["title"].as<std::string>();
+            task.description = row["description"].as<std::string>();
+            task.priority = row["priority"].as<int>();
+            task.category = row["category"].as<int>();
+            task.deadline = row["deadline"].as<std::string>();
+            task.estimated_minutes = row["estimated_minutes"].as<int>();
+            task.completed = row["completed"].as<bool>();
+            task.user_id = user_id;
+            tasks.push_back(task);
+        }
+
+        transaction.commit();
+        return tasks;
+    } catch (const std::exception& e) {
+        transaction.abort();
+        throw std::runtime_error("Failed to get tasks by priority: " + std::string(e.what()));
+    }
 }
 
-std::vector<TaskModel::Task> TaskModel::getTasksByCategory(int category) {
-    auto all_tasks = getAllTasks();
-    std::vector<Task> filtered_tasks;
-    for (const auto& task : all_tasks) {
-        if (task.category == category) {
-            filtered_tasks.push_back(task);
-        }
+std::vector<TaskModel::Task> TaskModel::getTasksByCategoryForUser(int category, int user_id) {
+    if (category < 1 || category > 3) {
+        throw std::invalid_argument("Category must be between 1 and 3");
     }
-    return filtered_tasks;
+
+    Storage::Session session(this->storageManager);
+    pqxx::work transaction(session.Get());
+
+    try {
+        const std::string query =
+            "SELECT * FROM \"Tasks\" "
+            "WHERE category = " + std::to_string(category) + " " +
+            "AND user_id = " + std::to_string(user_id);
+
+        pqxx::result result = transaction.exec(query);
+        std::vector<Task> tasks;
+
+        for (const auto& row : result) {
+            Task task;
+            task.id = row["id"].as<int>();
+            task.title = row["title"].as<std::string>();
+            task.description = row["description"].as<std::string>();
+            task.priority = row["priority"].as<int>();
+            task.category = row["category"].as<int>();
+            task.deadline = row["deadline"].as<std::string>();
+            task.estimated_minutes = row["estimated_minutes"].as<int>();
+            task.completed = row["completed"].as<bool>();
+            task.user_id = user_id;
+            tasks.push_back(task);
+        }
+
+        transaction.commit();
+        return tasks;
+    } catch (const std::exception& e) {
+        transaction.abort();
+        throw std::runtime_error("Failed to get tasks by category: " + std::string(e.what()));
+    }
 }

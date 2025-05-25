@@ -21,13 +21,19 @@ public:
         std::string deadline;
         int estimated_minutes;
         bool completed;
+        int user_id;
     };
 
-    std::vector<Task> getAllTasks();
-    bool createTask(const Task& task);
-    bool updateTask(const Task& task);
-    bool deleteTask(int task_id);
-    std::vector<Task> getTasksByPriority(int priority);
-    std::vector<Task> getTasksByCategory(int category);
+    std::vector<Task> getAllTasksForUser(int user_id);
+    bool createTaskForUser(const Task& task);
+    bool updateTaskForUser(const Task& task);
+    bool deleteTaskForUser(int task_id, int user_id);
+    std::vector<Task> getTasksByPriorityForUser(int priority, int user_id);
+    std::vector<Task> getTasksByCategoryForUser(int category, int user_id);
+
+private:
+    void validateTask(const Task& task) const;
+    void verifyTaskOwnership(int task_id, int user_id, pqxx::work& transaction);
 };
+
 } // namespace Components
