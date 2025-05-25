@@ -2,8 +2,8 @@
 
 #include <iostream>
 #include <memory>
-#include "../default/web/Routes.hpp"
 #include "../default/components/views/Error.hpp"
+#include "../default/web/Routes.hpp"
 #include "factories/ResponseFactory.hpp"
 
 #include "../web/Points.cpp"
@@ -11,7 +11,7 @@
 using namespace Core;
 
 namespace {
-    const size_t kServerErrorStatusCode = 500;
+const size_t kServerErrorStatusCode = 500;
 }
 
 Router::Router() {
@@ -54,15 +54,14 @@ http::response<http::string_body> Router::Route(const http::request<http::string
     Components::View view;
 
     try {
-        view = function(request);      
+        view = function(request);
     } catch (const std::exception& exception) {
         view = Components::Error(kServerErrorStatusCode);
 
         std::cerr << "Error: " << exception.what() << '\n';
     }
 
-    http::response<http::string_body> response = ResponseFactory.Make(view, request);  
-
+    http::response<http::string_body> response = ResponseFactory.Make(view, request);
 
     return response;
 }
@@ -97,10 +96,9 @@ Web::Routes::Function Router::Find(http::verb method, std::string url) {
             break;
     }
 
-    return
-        []([[maybe_unused]] const http::request<http::string_body>& request) -> Components::View {
-            const size_t kErrorStatusCode = 404;
+    return []([[maybe_unused]] const http::request<http::string_body>& request) -> Components::View {
+        const size_t kErrorStatusCode = 404;
 
-            return Components::Error(kErrorStatusCode);
-        };
+        return Components::Error(kErrorStatusCode);
+    };
 }

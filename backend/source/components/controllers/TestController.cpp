@@ -8,7 +8,7 @@ using namespace Components;
 using json = nlohmann::json;
 
 namespace {
-    const size_t kSuccessStatusCode = 200;
+const size_t kSuccessStatusCode = 200;
 }
 
 TestController::TestController(TestModel& testModel) : testModel(testModel) {

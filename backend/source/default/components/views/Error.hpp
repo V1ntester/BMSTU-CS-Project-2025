@@ -4,9 +4,9 @@
 
 namespace Components {
 class Error : public View {
-    public: 
-        Error(size_t kErrorStatusCode);
+ public:
+    Error(size_t kErrorStatusCode);
 
-        ~Error() override;
+    ~Error() override;
 };
 }  // namespace Components

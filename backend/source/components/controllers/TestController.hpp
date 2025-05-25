@@ -6,12 +6,13 @@
 namespace Components {
 class TestController : public Contoller {
  public:
-   TestController(TestModel& testModel);
+    TestController(TestModel& testModel);
 
-   ~TestController() override;
+    ~TestController() override;
 
     View GetHelloMessage();
     View GetAllLoginsOfUsers();
+
  private:
     TestModel& testModel;
 };
