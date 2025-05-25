@@ -32,6 +32,7 @@ WORKDIR /app
 
 COPY --from=build /app/build/main .
 COPY --from=build /usr/local/lib/libpqxx* /usr/local/lib/
+COPY source/.env . 
 
 RUN apt-get update && \
     apt-get install -y \
