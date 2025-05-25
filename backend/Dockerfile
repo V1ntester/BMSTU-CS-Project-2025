@@ -13,7 +13,7 @@ RUN apt-get update && \
     libpq-dev \ 
     && git clone https://github.com/jtv/libpqxx.git 
 
-RUN cd libpqxx \
+RUN cd libpqxx && \
     mkdir build && cd build && \ 
     cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr/local && \
     make && \
