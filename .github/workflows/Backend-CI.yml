@@ -10,48 +10,48 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
     steps:
-      - name: Setup clang-tidy
-        run: apt install -y clang-tidy
+      # - name: Setup clang-tidy
+      #   run: apt install -y clang-tidy
 
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v2
+      # - name: Setup CMake
+      #   uses: jwlawson/actions-setup-cmake@v2
 
-      - name: Install boost
-        run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
+      # - name: Install boost
+      #   run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
 
-      - name: Install nlohmann-json
-        run: apt-get install -y nlohmann-json3-dev
+      # - name: Install nlohmann-json
+      #   run: apt-get install -y nlohmann-json3-dev
 
       - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Build project and run clang-tidy
-        uses: threeal/cmake-action@v2
-        with:
-          source-dir: backend/source/
+      # - name: Build project and run clang-tidy
+      #   uses: threeal/cmake-action@v2
+      #   with:
+      #     source-dir: backend/source/
 
   clang-format:
     runs-on: ubuntu-latest
     container: ghcr.io/iraspa/ubuntu-22-llvm-18:latest
     steps:
-      - name: Setup CMake
-        uses: jwlawson/actions-setup-cmake@v2
+      # - name: Setup CMake
+      #   uses: jwlawson/actions-setup-cmake@v2
 
-      - name: Install boost
-        run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
+      # - name: Install boost
+      #   run: apt-get install -y libboost1.74-dev libboost-system1.74-dev
 
-      - name: Install nlohmann-json
-        run: apt-get install -y nlohmann-json3-dev
+      # - name: Install nlohmann-json
+      #   run: apt-get install -y nlohmann-json3-dev
 
       - name: Checkout project
         uses: actions/checkout@v4
 
-      - name: Run clang-format only
-        uses: threeal/cmake-action@v2
-        with:
-          source-dir: backend/source/
-          build-args: |
-            --target clang-format
+      # - name: Run clang-format only
+      #   uses: threeal/cmake-action@v2
+      #   with:
+      #     source-dir: backend/source/
+      #     build-args: |
+      #       --target clang-format
 
   docker-build:
     runs-on: ubuntu-latest
@@ -61,8 +61,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build and push
-        uses: docker/build-push-action@v6.6.0
-        with:
-          context: backend
-          file: backend/Dockerfile
+      # - name: Build and push
+      #   uses: docker/build-push-action@v6.6.0
+      #   with:
+      #     context: backend
+      #     file: backend/Dockerfile

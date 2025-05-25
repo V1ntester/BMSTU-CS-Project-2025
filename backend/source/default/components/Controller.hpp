@@ -12,6 +12,6 @@ class Contoller {
  public:
     Contoller();
 
-    ~Contoller();
+    virtual ~Contoller();
 };
 }  // namespace Components

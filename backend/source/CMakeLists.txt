@@ -11,10 +11,12 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 # Project files
 
 set(COMPONENTS_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TestModel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TestController.cpp
 )
 
 set(COMPONENTS_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TestModel.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TestController.hpp
 )
 
@@ -37,7 +39,9 @@ set(CORE_HEADERS
 ## Files for Default
 
 set(DEFAULT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/default/components/Model.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/default/components/views/View.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/default/components/views/Error.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/default/components/Controller.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/default/web/Routes.cpp
 )
@@ -45,6 +49,7 @@ set(DEFAULT_SOURCES
 set(DEFAULT_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/default/components/Model.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/default/components/views/View.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/default/components/views/Error.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/default/components/Controller.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/default/web/Routes.hpp
 )
@@ -99,7 +104,7 @@ add_executable(${project} ${SOURCES} ${HEADERS})
 target_link_libraries(${project} PRIVATE Boost::system)
 target_link_libraries(${project} PRIVATE nlohmann_json::nlohmann_json)
 
-target_link_libraries(${project} PRIVATE pqxx)
+target_link_libraries(${project} PRIVATE libpqxx::pqxx)
 target_link_libraries(${project} PRIVATE PostgreSQL::PostgreSQL)
 
 # Add compile options 

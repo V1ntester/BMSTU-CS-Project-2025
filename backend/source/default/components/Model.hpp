@@ -6,11 +6,11 @@
 namespace Components {
 class Model {
  public:
-    Model(std::shared_ptr<Storage::Manager> manager);
+    Model(Storage::Manager& storageManager);
 
-    ~Model();
+    virtual ~Model();
 
- private:
-    std::shared_ptr<Storage::Manager> manager;
+ protected:
+    Storage::Manager& storageManager;
 };
 }  // namespace Components

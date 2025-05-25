@@ -11,7 +11,7 @@ namespace http = boost::beast::http;
 namespace Web {
 namespace Routes {
 
-using Function = std::function<Components::View(const boost::beast::http::request<boost::beast::http::string_body>&, Storage::Manager& manager)>;
+using Function = std::function<Components::View(const boost::beast::http::request<boost::beast::http::string_body>&)>;
 
 class Route {
  public:

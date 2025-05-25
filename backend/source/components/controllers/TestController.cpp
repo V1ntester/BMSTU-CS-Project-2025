@@ -7,21 +7,33 @@
 using namespace Components;
 using json = nlohmann::json;
 
-// Bad Practice
-View TestController::Do(Storage::Manager& manager) {
-    Storage::Session session(manager);
+namespace {
+    const size_t kSuccessStatusCode = 200;
+}
 
-    pqxx::work transaction(session.Get());
+TestController::TestController(TestModel& testModel) : testModel(testModel) {
+}
 
-    pqxx::result result = transaction.exec("SELECT * FROM \"Users\"");
+TestController::~TestController() = default;
 
-    transaction.commit();
+View TestController::GetHelloMessage() {
+    json answer;
 
-    json logins = json::array();
+    answer["code"] = kSuccessStatusCode;
+    answer["message"] = "Hello!";
 
-    for (auto row : result) {
-        logins.push_back(row["login"].as<std::string>());
-    }
+    return {answer};
+}
 
-    return {logins};
+View TestController::GetAllLoginsOfUsers() {
+    json answer;
+
+    std::vector<std::string> logins = this->testModel.GetAllLoginsOfUsersInDataBase();
+
+    answer["result"] = logins;
+
+    answer["code"] = kSuccessStatusCode;
+    answer["message"] = "Success";
+
+    return {answer};
 }

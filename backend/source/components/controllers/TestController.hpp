@@ -1,12 +1,18 @@
 #pragma once
 
 #include "../../default/components/Controller.hpp"
-#include "../../storage/Manager.hpp"
+#include "../models/TestModel.hpp"
 
 namespace Components {
-// Bad Practice
 class TestController : public Contoller {
  public:
-    View Do(Storage::Manager& manager);
+   TestController(TestModel& testModel);
+
+   ~TestController() override;
+
+    View GetHelloMessage();
+    View GetAllLoginsOfUsers();
+ private:
+    TestModel& testModel;
 };
 }  // namespace Components
