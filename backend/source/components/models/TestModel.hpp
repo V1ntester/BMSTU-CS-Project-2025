@@ -9,7 +9,7 @@
 namespace Components {
 class TestModel : public Model {
  public:
-    TestModel(Storage::Manager& storageManager);
+    explicit TestModel(Storage::Manager& storageManager);
 
     ~TestModel() override;
 
