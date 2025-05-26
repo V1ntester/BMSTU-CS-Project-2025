@@ -1,12 +1,12 @@
 #include "../storage/Manager.hpp"
 
-#include "../components/models/TestModel.hpp"
-#include "../components/controllers/TestController.hpp"
+#include "../components/models/TaskModel.hpp"     
+#include "../components/controllers/TaskController.hpp" 
 
 namespace Web
 {
     Storage::Manager storageManager;
 
-    Components::TestModel testModel(storageManager);
-    Components::TestController testController(testModel);
+    Components::TaskModel taskModel(storageManager);            
+    Components::TaskController taskController(taskModel);       
 } // namespace Web
