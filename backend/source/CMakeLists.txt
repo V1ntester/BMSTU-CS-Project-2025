@@ -92,7 +92,7 @@ set(HEADERS
 
 # Include libraries
 
-find_package(Boost 1.74 REQUIRED COMPONENTS system)
+find_package(Boost 1.81.0 REQUIRED COMPONENTS system url)
 find_package(nlohmann_json 3.10.5 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(PostgreSQL REQUIRED)
@@ -106,8 +106,11 @@ add_executable(${project} ${SOURCES} ${HEADERS})
 
 # Link libraries
 
-target_link_libraries(${project} PRIVATE Boost::system)
-target_link_libraries(${project} PRIVATE Boost_url)
+target_link_libraries(${project} PRIVATE 
+    Boost::boost
+    Boost::system
+    Boost::url
+)
 target_link_libraries(${project} PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(${project} PRIVATE OpenSSL::Crypto)
 
