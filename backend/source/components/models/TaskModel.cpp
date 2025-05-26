@@ -1,12 +1,12 @@
 #include "TaskModel.hpp"
+#include <chrono>
 #include <pqxx/pqxx>
 #include <stdexcept>
-#include <chrono>
 
 using namespace Components;
 
-TaskModel::TaskModel(Storage::Manager& storageManager)
-    : Model(storageManager) {}
+TaskModel::TaskModel(Storage::Manager& storageManager) : Model(storageManager) {
+}
 
 void TaskModel::validateTask(const Task& task) const {
     if (task.title.empty()) {
@@ -26,7 +26,8 @@ void TaskModel::validateTask(const Task& task) const {
 void TaskModel::verifyTaskOwnership(int task_id, int user_id, pqxx::work& transaction) {
     const std::string query =
         "SELECT user_id FROM \"Tasks\" "
-        "WHERE id = " + std::to_string(task_id);
+        "WHERE id = " +
+        std::to_string(task_id);
 
     pqxx::result result = transaction.exec(query);
 
@@ -46,7 +47,8 @@ std::vector<TaskModel::Task> TaskModel::getAllTasksForUser(int user_id) {
     try {
         const std::string query =
             "SELECT * FROM \"Tasks\" "
-            "WHERE user_id = " + std::to_string(user_id);
+            "WHERE user_id = " +
+            std::to_string(user_id);
 
         pqxx::result result = transaction.exec(query);
         std::vector<Task> tasks;
@@ -83,14 +85,9 @@ bool TaskModel::createTaskForUser(const Task& task) {
             "INSERT INTO \"Tasks\" "
             "(title, description, priority, category, deadline, estimated_minutes, completed, user_id) "
             "VALUES (" +
-            transaction.quote(task.title) + ", " +
-            transaction.quote(task.description) + ", " +
-            std::to_string(task.priority) + ", " +
-            std::to_string(task.category) + ", " +
-            transaction.quote(task.deadline) + ", " +
-            std::to_string(task.estimated_minutes) + ", " +
-            (task.completed ? "TRUE" : "FALSE") + ", " +
-            std::to_string(task.user_id) + ") RETURNING id";
+            transaction.quote(task.title) + ", " + transaction.quote(task.description) + ", " + std::to_string(task.priority) + ", " +
+            std::to_string(task.category) + ", " + transaction.quote(task.deadline) + ", " + std::to_string(task.estimated_minutes) + ", " +
+            (task.completed ? "TRUE" : "FALSE") + ", " + std::to_string(task.user_id) + ") RETURNING id";
 
         pqxx::result result = transaction.exec(query);
         transaction.commit();
@@ -111,15 +108,11 @@ bool TaskModel::updateTaskForUser(const Task& task) {
 
         const std::string query =
             "UPDATE \"Tasks\" SET "
-            "title = " + transaction.quote(task.title) + ", " +
-            "description = " + transaction.quote(task.description) + ", " +
-            "priority = " + std::to_string(task.priority) + ", " +
-            "category = " + std::to_string(task.category) + ", " +
-            "deadline = " + transaction.quote(task.deadline) + ", " +
-            "estimated_minutes = " + std::to_string(task.estimated_minutes) + ", " +
-            "completed = " + (task.completed ? "TRUE" : "FALSE") + " " +
-            "WHERE id = " + std::to_string(task.id) + " " +
-            "RETURNING id";
+            "title = " +
+            transaction.quote(task.title) + ", " + "description = " + transaction.quote(task.description) + ", " +
+            "priority = " + std::to_string(task.priority) + ", " + "category = " + std::to_string(task.category) + ", " +
+            "deadline = " + transaction.quote(task.deadline) + ", " + "estimated_minutes = " + std::to_string(task.estimated_minutes) + ", " +
+            "completed = " + (task.completed ? "TRUE" : "FALSE") + " " + "WHERE id = " + std::to_string(task.id) + " " + "RETURNING id";
 
         pqxx::result result = transaction.exec(query);
         transaction.commit();
@@ -139,8 +132,8 @@ bool TaskModel::deleteTaskForUser(int task_id, int user_id) {
 
         const std::string query =
             "DELETE FROM \"Tasks\" "
-            "WHERE id = " + std::to_string(task_id) + " " +
-            "RETURNING id";
+            "WHERE id = " +
+            std::to_string(task_id) + " " + "RETURNING id";
 
         pqxx::result result = transaction.exec(query);
         transaction.commit();
@@ -162,8 +155,8 @@ std::vector<TaskModel::Task> TaskModel::getTasksByPriorityForUser(int priority, 
     try {
         const std::string query =
             "SELECT * FROM \"Tasks\" "
-            "WHERE priority = " + std::to_string(priority) + " " +
-            "AND user_id = " + std::to_string(user_id);
+            "WHERE priority = " +
+            std::to_string(priority) + " " + "AND user_id = " + std::to_string(user_id);
 
         pqxx::result result = transaction.exec(query);
         std::vector<Task> tasks;
@@ -201,8 +194,8 @@ std::vector<TaskModel::Task> TaskModel::getTasksByCategoryForUser(int category, 
     try {
         const std::string query =
             "SELECT * FROM \"Tasks\" "
-            "WHERE category = " + std::to_string(category) + " " +
-            "AND user_id = " + std::to_string(user_id);
+            "WHERE category = " +
+            std::to_string(category) + " " + "AND user_id = " + std::to_string(user_id);
 
         pqxx::result result = transaction.exec(query);
         std::vector<Task> tasks;
