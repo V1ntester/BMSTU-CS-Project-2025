@@ -10,11 +10,6 @@ namespace Web {
 
 namespace http = boost::beast::http;
 
-<<<<<<< HEAD
-std::shared_ptr<Routes::Route> points[1]{
-    std::make_shared<Routes::Post>("/users/auth",
-                                   []([[maybe_unused]] const auto& request) -> Components::View { return userController.Authorize(request); }),
-=======
 std::shared_ptr<Routes::Route> points[6]{
 
     std::make_shared<Routes::Post>(
@@ -53,7 +48,5 @@ std::shared_ptr<Routes::Route> points[6]{
             int userId = 1; // TODO: Получить из аутентификации
             return Web::taskController.GetTasksByCategory(category, userId);
         })
->>>>>>> feature/tasks-functions-init
 };
 } // namespace Web
-
