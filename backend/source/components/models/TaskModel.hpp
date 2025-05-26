@@ -8,7 +8,7 @@
 namespace Components {
 
 class TaskModel : public Model {
-public:
+ public:
     explicit TaskModel(Storage::Manager& storageManager);
     ~TaskModel() = default;
 
@@ -31,9 +31,9 @@ public:
     std::vector<Task> getTasksByPriorityForUser(int priority, int user_id);
     std::vector<Task> getTasksByCategoryForUser(int category, int user_id);
 
-private:
+ private:
     void validateTask(const Task& task) const;
     void verifyTaskOwnership(int task_id, int user_id, pqxx::work& transaction);
 };
 
-} // namespace Components
+}  // namespace Components
