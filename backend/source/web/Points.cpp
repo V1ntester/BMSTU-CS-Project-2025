@@ -10,10 +10,44 @@ namespace Web {
 
 namespace http = boost::beast::http;
 
-std::shared_ptr<Routes::Route> points[2]{
+std::shared_ptr<Routes::Route> points[6]{
+
+    std::make_shared<Routes::Post>(
+        "/tasks/create", [](const auto& request) -> Components::View {
+            return Web::taskController.CreateTask(json::parse(request.body()));
+        }),
+    
+    std::make_shared<Routes::Put>(
+        "/tasks/update", [](const auto& request) -> Components::View {
+            return Web::taskController.UpdateTask(json::parse(request.body()));
+        }),
+    
+    std::make_shared<Routes::Delete>(
+        "/tasks/delete", [](const auto& request) -> Components::View {
+            int taskId = extractIdFromPath(request.target().to_string());
+            int userId = 1; // TODO: Получить из аутентификации
+            return Web::taskController.DeleteTask(taskId, userId);
+        }),
+    
     std::make_shared<Routes::Get>(
-        "/hello", []([[maybe_unused]] const auto& request) -> Components::View { return Web::testController.GetHelloMessage(); }),
+        "/tasks", []([[maybe_unused]] const auto& request) -> Components::View {
+            int userId = 1; // TODO: Получить из аутентификации
+            return Web::taskController.GetAllTasks(userId);
+        }),
+    
     std::make_shared<Routes::Get>(
-        "/test", []([[maybe_unused]] const auto& request) -> Components::View { return Web::testController.GetAllLoginsOfUsers(); }),
+        "/tasks/priority", [](const auto& request) -> Components::View {
+            int priority = extractIdFromPath(request.target().to_string());
+            int userId = 1; // TODO: Получить из аутентификации
+            return Web::taskController.GetTasksByPriority(priority, userId);
+        }),
+    
+    std::make_shared<Routes::Get>(
+        "/tasks/category", [](const auto& request) -> Components::View {
+            int category = extractIdFromPath(request.target().to_string());
+            int userId = 1; // TODO: Получить из аутентификации
+            return Web::taskController.GetTasksByCategory(category, userId);
+        })
 };
-}  // namespace Web
+} // namespace Web
+
