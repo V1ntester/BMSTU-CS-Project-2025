@@ -11,42 +11,34 @@ namespace Web {
 namespace http = boost::beast::http;
 
 std::shared_ptr<Routes::Route> points[6]{
-
     std::make_shared<Routes::Post>(
         "/tasks/create", [](const auto& request) -> Components::View {
-            return Web::taskController.CreateTask(json::parse(request.body()));
+            return Web::taskController.CreateTask();
         }),
     
     std::make_shared<Routes::Put>(
         "/tasks/update", [](const auto& request) -> Components::View {
-            return Web::taskController.UpdateTask(json::parse(request.body()));
+            return Web::taskController.UpdateTask();
         }),
     
     std::make_shared<Routes::Delete>(
         "/tasks/delete", [](const auto& request) -> Components::View {
-            int taskId = extractIdFromPath(request.target().to_string());
-            int userId = 1; // TODO: Получить из аутентификации
-            return Web::taskController.DeleteTask(taskId, userId);
+            return Web::taskController.DeleteTask();
         }),
     
     std::make_shared<Routes::Get>(
-        "/tasks", []([[maybe_unused]] const auto& request) -> Components::View {
-            int userId = 1; // TODO: Получить из аутентификации
-            return Web::taskController.GetAllTasks(userId);
+        "/tasks", [](const auto& request) -> Components::View {
+            return Web::taskController.GetAllTasks();
         }),
     
     std::make_shared<Routes::Get>(
         "/tasks/priority", [](const auto& request) -> Components::View {
-            int priority = extractIdFromPath(request.target().to_string());
-            int userId = 1; // TODO: Получить из аутентификации
-            return Web::taskController.GetTasksByPriority(priority, userId);
+            return Web::taskController.GetTasksByPriority();
         }),
     
     std::make_shared<Routes::Get>(
         "/tasks/category", [](const auto& request) -> Components::View {
-            int category = extractIdFromPath(request.target().to_string());
-            int userId = 1; // TODO: Получить из аутентификации
-            return Web::taskController.GetTasksByCategory(category, userId);
+            return Web::taskController.GetTasksByCategory();
         })
 };
 } // namespace Web

@@ -6,7 +6,7 @@
 
 namespace Components {
 
-class TaskController : public Contoller {
+class TaskController : public Controller {
 public:
     explicit TaskController(TaskModel& taskModel);
     ~TaskController() override = default;
