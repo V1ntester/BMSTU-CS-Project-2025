@@ -10,35 +10,37 @@ namespace Web {
 
 namespace http = boost::beast::http;
 
-std::shared_ptr<Routes::Route> points[6]{
-    std::make_shared<Routes::Post>(
-        "/tasks/create", [](const auto& request) -> Components::View {
-            return Web::taskController.CreateTask();
-        }),
-    
-    std::make_shared<Routes::Put>(
-        "/tasks/update", [](const auto& request) -> Components::View {
-            return Web::taskController.UpdateTask();
-        }),
-    
-    std::make_shared<Routes::Delete>(
-        "/tasks/delete", [](const auto& request) -> Components::View {
-            return Web::taskController.DeleteTask();
-        }),
-    
-    std::make_shared<Routes::Get>(
-        "/tasks", [](const auto& request) -> Components::View {
-            return Web::taskController.GetAllTasks();
-        }),
-    
-    std::make_shared<Routes::Get>(
-        "/tasks/priority", [](const auto& request) -> Components::View {
-            return Web::taskController.GetTasksByPriority();
-        }),
-    
-    std::make_shared<Routes::Get>(
-        "/tasks/category", [](const auto& request) -> Components::View {
-            return Web::taskController.GetTasksByCategory();
-        })
+std::shared_ptr<Routes::Route> points[1]{
+    std::make_shared<Routes::Post>("/check",
+                                   []([[maybe_unused]] const auto& request) -> Components::View { return Web::userController.Authorize(request); }),
+    // std::make_shared<Routes::Post>(
+    //     "/tasks/create", [](const auto& request) -> Components::View {
+    //         return Web::taskController.CreateTask();
+    //     }),
+
+    // std::make_shared<Routes::Put>(
+    //     "/tasks/update", [](const auto& request) -> Components::View {
+    //         return Web::taskController.UpdateTask();
+    //     }),
+
+    // std::make_shared<Routes::Delete>(
+    //     "/tasks/delete", [](const auto& request) -> Components::View {
+    //         return Web::taskController.DeleteTask();
+    //     }),
+
+    // std::make_shared<Routes::Get>(
+    //     "/tasks", [](const auto& request) -> Components::View {
+    //         return Web::taskController.GetAllTasks();
+    //     }),
+
+    // std::make_shared<Routes::Get>(
+    //     "/tasks/priority", [](const auto& request) -> Components::View {
+    //         return Web::taskController.GetTasksByPriority();
+    //     }),
+
+    // std::make_shared<Routes::Get>(
+    //     "/tasks/category", [](const auto& request) -> Components::View {
+    //         return Web::taskController.GetTasksByCategory();
+    //     })
 };
-} // namespace Web
+}  // namespace Web
