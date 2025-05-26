@@ -10,7 +10,7 @@ namespace Components {
 class TaskModel : public Model {
  public:
     explicit TaskModel(Storage::Manager& storageManager);
-    ~TaskModel() = default;
+    ~TaskModel() override;
 
     struct Task {
         int id;

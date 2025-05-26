@@ -8,6 +8,8 @@ using namespace Components;
 TaskModel::TaskModel(Storage::Manager& storageManager) : Model(storageManager) {
 }
 
+TaskModel::~TaskModel() = default;
+
 void TaskModel::validateTask(const Task& task) const {
     if (task.title.empty()) {
         throw std::invalid_argument("Task title cannot be empty");
