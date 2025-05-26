@@ -2,28 +2,28 @@
 
 #include "../../default/components/Controller.hpp"
 #include "../models/TaskModel.hpp"
-#include <nlohmann/json.hpp>
+#include "../models/UserModel.hpp"
 
 namespace Components {
 
 class TaskController : public Controller {
 public:
-    explicit TaskController(TaskModel& taskModel);
-    ~TaskController() override = default;
+    TaskController(TaskModel& taskModel, UserModel& userModel);
+    ~TaskController() override;
 
-    View CreateTask(const nlohmann::json& taskData);
-    View UpdateTask(const nlohmann::json& taskData);
-    View DeleteTask(int taskId, int userId);
-    View GetAllTasks(int userId);
-    View GetTasksByPriority(int priority, int userId);
-    View GetTasksByCategory(int category, int userId);
+    View CreateTask(const Request& request);
+    View UpdateTask(const Request& request);
+    View DeleteTask(const Request& request);
+    View GetAllTasks(const Request& request);
+    View GetTasksByPriority(const Request& request);
+    View GetTasksByCategory(const Request& request);
 
 private:
     TaskModel& taskModel;
+    UserModel& userModel;
 
-    void validateTaskData(const nlohmann::json& taskData) const;
-    TaskModel::Task jsonToTask(const nlohmann::json& taskData) const;
-    nlohmann::json taskToJson(const TaskModel::Task& task) const;
+    int ExtractUserIdFromRequest(const Request& request) const;
+    TaskModel::Task ParseTaskFromRequest(const Request& request, bool requireId = false) const;
 };
 
-} // namespace Components
+}  // namespace Components

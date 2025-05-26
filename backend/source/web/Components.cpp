@@ -9,5 +9,5 @@ namespace Web
 
     Components::UserModel userModel(storageManager);
     Components::TaskModel taskModel(storageManager);            
-    Components::TaskController taskController(taskModel);       
+    Components::TaskController taskController(taskModel, userModel);       
 } // namespace Web
