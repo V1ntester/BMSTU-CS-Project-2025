@@ -8,7 +8,7 @@
 namespace Components {
 
 class TaskModel : public Model {
- public:
+public:
     explicit TaskModel(Storage::Manager& storageManager);
     ~TaskModel() = default;
 
@@ -19,21 +19,22 @@ class TaskModel : public Model {
         int priority;
         int category;
         std::string deadline;
-        int estimated_minutes;
+        int estimatedMinutes;
         bool completed;
-        int user_id;
+        int userId;
     };
 
-    std::vector<Task> getAllTasksForUser(int user_id);
-    bool createTaskForUser(const Task& task);
-    bool updateTaskForUser(const Task& task);
-    bool deleteTaskForUser(int task_id, int user_id);
-    std::vector<Task> getTasksByPriorityForUser(int priority, int user_id);
-    std::vector<Task> getTasksByCategoryForUser(int category, int user_id);
+    std::vector<Task> GetAllTasksForUser(int userId);
+    bool CreateTaskForUser(const Task& task);
+    bool UpdateTaskForUser(const Task& task);
+    bool DeleteTaskForUser(int taskId, int userId);
+    std::vector<Task> GetTasksByPriorityForUser(int priority, int userId);
+    std::vector<Task> GetTasksByCategoryForUser(int category, int userId);
+    bool IsTaskExistsForUser(int taskId, int userId);
 
- private:
-    void validateTask(const Task& task) const;
-    void verifyTaskOwnership(int task_id, int user_id, pqxx::work& transaction);
+private:
+    void ValidateTask(const Task& task) const;
+    void VerifyTaskOwnership(int taskId, int userId, pqxx::work& transaction);
 };
 
 }  // namespace Components
