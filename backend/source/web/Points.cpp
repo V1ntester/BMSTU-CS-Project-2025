@@ -10,10 +10,8 @@ namespace Web {
 
 namespace http = boost::beast::http;
 
-std::shared_ptr<Routes::Route> points[2]{
-    std::make_shared<Routes::Get>(
-        "/hello", []([[maybe_unused]] const auto& request) -> Components::View { return Web::testController.GetHelloMessage(); }),
-    std::make_shared<Routes::Get>(
-        "/test", []([[maybe_unused]] const auto& request) -> Components::View { return Web::testController.GetAllLoginsOfUsers(); }),
+std::shared_ptr<Routes::Route> points[1]{
+    std::make_shared<Routes::Post>("/users/auth",
+                                   []([[maybe_unused]] const auto& request) -> Components::View { return userController.Authorize(request); }),
 };
 }  // namespace Web

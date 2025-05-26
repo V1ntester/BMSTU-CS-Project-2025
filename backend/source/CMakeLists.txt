@@ -11,8 +11,6 @@ set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 # Project files
 
 set(COMPONENTS_SOURCES
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TestModel.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TestController.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TaskModel.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TaskController.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/models/UserModel.cpp
@@ -20,8 +18,6 @@ set(COMPONENTS_SOURCES
 )
 
 set(COMPONENTS_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TestModel.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TestController.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/models/TaskModel.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/controllers/TaskController.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/components/models/UserModel.hpp
@@ -98,6 +94,7 @@ set(HEADERS
 
 find_package(Boost 1.74 REQUIRED COMPONENTS system)
 find_package(nlohmann_json 3.10.5 REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(PostgreSQL REQUIRED)
 find_package(libpqxx REQUIRED)
 
@@ -110,7 +107,9 @@ add_executable(${project} ${SOURCES} ${HEADERS})
 # Link libraries
 
 target_link_libraries(${project} PRIVATE Boost::system)
+target_link_libraries(${project} PRIVATE Boost_url)
 target_link_libraries(${project} PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${project} PRIVATE OpenSSL::Crypto)
 
 target_link_libraries(${project} PRIVATE libpqxx::pqxx)
 target_link_libraries(${project} PRIVATE PostgreSQL::PostgreSQL)

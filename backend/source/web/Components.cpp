@@ -1,12 +1,12 @@
 #include "../storage/Manager.hpp"
 
-#include "../components/models/TestModel.hpp"
-#include "../components/controllers/TestController.hpp"
+#include "../components/models/UserModel.hpp"
+#include "../components/controllers/UserController.hpp"
 
 namespace Web
 {
     Storage::Manager storageManager;
 
-    Components::TestModel testModel(storageManager);
-    Components::TestController testController(testModel);
+    Components::UserModel userModel(storageManager);
+    Components::UserController userController(userModel);
 } // namespace Web

@@ -2,6 +2,6 @@
 
 using namespace Components;
 
-Contoller::Contoller() = default;
+Controller::Controller() = default;
 
-Contoller::~Contoller() = default;
+Controller::~Controller() = default;

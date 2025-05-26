@@ -13,7 +13,6 @@ class UserModel : public Model {
 
     bool Identify(std::string login);
     bool Authenticate(std::string login, std::string password);
-    // bool Authorize(std::string code);
 
     void Add(std::string login, std::string email, std::string password);
     void Delete(std::string login);

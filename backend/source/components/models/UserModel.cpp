@@ -1,3 +1,6 @@
+// For UserModel::GeneratePasswordHash Function
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include "UserModel.hpp"
 
 #include <openssl/sha.h>
@@ -54,10 +57,10 @@ void UserModel::Add(std::string login, std::string email, std::string password) 
     std::string verificationCode = this->GeneratePrimaryVerificationCode();
     std::string updatingCode = this->GeneratePrimaryUpdatingCode();
 
-    transaction.exec_params(
+    transaction.exec(
         "INSERT INTO \"Users\" (login, email, password_hash, verification_code, updating_code, created_at) VALUES ($1, $2, $3, $4, $5, "
         "CURRENT_TIMESTAMP)",
-        login, email, passwordHash, verificationCode, updatingCode);
+        pqxx::params{login, email, passwordHash, verificationCode, updatingCode});
 
     transaction.commit();
 }
@@ -67,7 +70,7 @@ void UserModel::Delete(std::string login) {
 
     pqxx::work transaction(session.Get());
 
-    transaction.exec_params("DELETE FROM \"Users\" WHERE login = $1", login);
+    transaction.exec("DELETE FROM \"Users\" WHERE login = $1", pqxx::params{login});
 
     transaction.commit();
 }
@@ -79,7 +82,7 @@ void UserModel::Restore(std::string code, std::string password) {
 
     std::string passwordHash = this->GeneratePasswordHash(password);
 
-    transaction.exec_params("UPDATE \"Users\" SET password_hash = $2 WHERE verification_code = $1", code, passwordHash);
+    transaction.exec("UPDATE \"Users\" SET password_hash = $2 WHERE verification_code = $1", pqxx::params{code, passwordHash});
 
     transaction.commit();
 }
@@ -89,7 +92,7 @@ void UserModel::Verify(std::string code) {
 
     pqxx::work transaction(session.Get());
 
-    transaction.exec_params("UPDATE \"Users\" SET verified = true WHERE verification_code = $1", code);
+    transaction.exec("UPDATE \"Users\" SET verified = true WHERE verification_code = $1", pqxx::params{code});
 
     transaction.commit();
 }
@@ -116,9 +119,9 @@ std::string UserModel::GeneratePrimaryVerificationCode() {
 
     pqxx::work transaction(session.Get());
 
-    size_t count = 0;
+    size_t count = 1;
 
-    do {
+    while (count > 0) {
         code = GenerateRandomString(kVerificationCodeLength);
 
         pqxx::work transaction(session.Get());
@@ -126,21 +129,21 @@ std::string UserModel::GeneratePrimaryVerificationCode() {
         count = transaction.query_value<size_t>("SELECT COUNT(*) FROM \"Users\" WHERE verification_code = " + code);
 
         transaction.commit();
-    } while (count > 0);
+    }
 
     return code;
 }
 
 std::string UserModel::GeneratePrimaryUpdatingCode() {
-        std::string code;
+    std::string code;
 
     Storage::Session session(this->storageManager);
 
     pqxx::work transaction(session.Get());
 
-    size_t count = 0;
+    size_t count = 1;
 
-    do {
+    while (count > 0) {
         code = GenerateRandomString(kUpdatingCodeLength);
 
         pqxx::work transaction(session.Get());
@@ -148,7 +151,7 @@ std::string UserModel::GeneratePrimaryUpdatingCode() {
         count = transaction.query_value<size_t>("SELECT COUNT(*) FROM \"Users\" WHERE updating_code = " + code);
 
         transaction.commit();
-    } while (count > 0);
+    }
 
     return code;
 }
