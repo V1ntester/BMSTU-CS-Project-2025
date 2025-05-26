@@ -1,7 +1,4 @@
 #include "TaskController.hpp"
-<<<<<<< HEAD
-//подтянуть
-=======
 #include <stdexcept>
 
 using namespace Components;
@@ -185,4 +182,3 @@ View TaskController::GetTasksByCategory(int category, int userId) {
     }
     return {response};
 }
->>>>>>> f528da806b45b5bc072d8ba51f9f71e99b889d49
