@@ -42,8 +42,6 @@ View UserController::Authorize(const Request& request) {
     std::string login = requestBody["login"];
     std::string password = requestBody["password"];
 
-    // Вот должна быть проверка этих строк, нормальные ли они (Длина, trim и прочее)
-
     bool isIndentify = this->userModel.IdentifyByLogin(login);
 
     if (isIndentify) {

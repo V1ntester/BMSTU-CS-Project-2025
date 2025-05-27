@@ -1,233 +1,236 @@
+// TaskController.cpp
 #include "TaskController.hpp"
-
 #include <nlohmann/json.hpp>
 #include <string>
+#include <algorithm>
 #include "pqxx/pqxx"
 
 using namespace Components;
 using json = nlohmann::json;
 
 namespace {
-// const size_t kSuccessStatusCode = 200;
-// const size_t kBadRequestStatusCode = 400;
-// // const size_t kUnauthorizedStatusCode = 401;
-// const size_t kNotFoundStatusCode = 404;
+const size_t kSuccessStatusCode = 200;
+const size_t kCreatedStatusCode = 201;
+const size_t kBadRequestStatusCode = 400;
 }
 
-TaskController::TaskController(TaskModel& taskModel, UserModel& userModel) 
-    : taskModel(taskModel), userModel(userModel) {
+// Вспомогательная функция сериализации Task в json
+void ConvertTasksToJson(const std::vector<TaskModel::Task>& tasks, json& outJsonArray) {
+    for (const auto& task : tasks) {
+        json taskJson;
+        taskJson["id"] = task.id;
+        taskJson["title"] = task.title;
+        taskJson["description"] = task.description;
+        taskJson["priority"] = task.priority;
+        taskJson["category"] = task.category;
+        taskJson["deadline"] = task.deadline;
+        taskJson["estimatedMinutes"] = task.estimatedMinutes;
+        taskJson["completed"] = task.completed;
+        taskJson["userId"] = task.userId;
+        outJsonArray.push_back(taskJson);
+    }
 }
+
+TaskController::TaskController(TaskModel& taskModel, UserModel& userModel)
+    : taskModel(taskModel), userModel(userModel) {}
 
 TaskController::~TaskController() = default;
 
-// int TaskController::ExtractUserIdFromRequest(const Request& request) const {
-//     // try {
-//     //     auto authHeader = request.find("Authorization");
-//     //     // както надо репализовать получение реквеста из вне (я не понимаю как он снаружи к нам - ыть)
-//     // }
+View TaskController::GetAllTasksForUser(const Request& request) {
+    json answer;
+    json requestBody;
 
-//     return 0;
-// }
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
 
-// TaskModel::Task TaskController::ParseTaskFromRequest(const Request& request, bool requireId) const {
-//     try {
-//         json body = json::parse(request.body());
-//         TaskModel::Task task;
+    try {
+        requestBody = json::parse(request.body());
+    } catch (...) {
+        return {answer};
+    }
 
-//         if (requireId) {
-//             task.id = body["id"].get<int>();
-//         }
-        
-//         task.title = body["title"].get<std::string>();
-//         task.description = body["description"].get<std::string>();
-//         task.priority = body["priority"].get<int>();
-//         task.category = body["category"].get<int>();
-//         task.deadline = body["deadline"].get<std::string>();
-//         task.estimatedMinutes = body["estimatedMinutes"].get<int>();
-//         task.completed = body.value("completed", false);
+    if (!requestBody.contains("userId")) {
+        return {answer};
+    }
 
-//         return task;
-//     } catch (const std::exception& e) {
-//         throw std::runtime_error("Invalid task data: " + std::string(e.what()));
-//     }
-// }
+    int userId = requestBody["userId"];
+    auto tasks = taskModel.GetAllTasksForUser(userId);
 
-// View TaskController::CreateTask(const Request& request) {
-//     json response;
-    
-//     try {
-//         int userId = ExtractUserIdFromRequest(request);
-//         TaskModel::Task task = ParseTaskFromRequest(request);
-//         task.userId = userId;
+    json tasksJson;
+    ConvertTasksToJson(tasks, tasksJson);
 
-//         if (taskModel.CreateTaskForUser(task)) {
-//             response["code"] = kSuccessStatusCode;
-//             response["message"] = "Task created successfully";
-//         } else {
-//             response["code"] = kBadRequestStatusCode;
-//             response["message"] = "Failed to create task";
-//         }
-//     } catch (const std::exception& e) {
-//         response["code"] = kBadRequestStatusCode;
-//         response["message"] = e.what();
-//     }
+    answer["tasks"] = tasksJson;
+    answer["code"] = kSuccessStatusCode;
+    answer["message"] = "Success";
 
-//     return response;
-// }
+    return {answer};
+}
 
-// View TaskController::UpdateTask(const Request& request) {
-//     json response;
-    
-//     try {
-//         int userId = ExtractUserIdFromRequest(request);
-//         TaskModel::Task task = ParseTaskFromRequest(request, true);
-//         task.userId = userId;
+View TaskController::CreateTaskForUser(const Request& request) {
+    json answer;
+    json requestBody;
 
-//         if (!taskModel.IsTaskExistsForUser(task.id, userId)) {
-//             response["code"] = kNotFoundStatusCode;
-//             response["message"] = "Task not found";
-//             return response;
-//         }
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
 
-//         if (taskModel.UpdateTaskForUser(task)) {
-//             response["code"] = kSuccessStatusCode;
-//             response["message"] = "Task updated successfully";
-//         } else {
-//             response["code"] = kBadRequestStatusCode;
-//             response["message"] = "Failed to update task";
-//         }
-//     } catch (const std::exception& e) {
-//         response["code"] = kBadRequestStatusCode;
-//         response["message"] = e.what();
-//     }
+    try {
+        requestBody = json::parse(request.body());
+    } catch (...) {
+        return {answer};
+    }
 
-//     return response;
-// }
+    if (!requestBody.contains("title") || !requestBody.contains("priority") ||
+        !requestBody.contains("category") || !requestBody.contains("deadline") ||
+        !requestBody.contains("estimatedMinutes") || !requestBody.contains("completed") ||
+        !requestBody.contains("userId")) {
+        return {answer};
+    }
 
-// View TaskController::DeleteTask(const Request& request) {
-//     json response;
-    
-//     try {
-//         int userId = ExtractUserIdFromRequest(request);
-//         json body = json::parse(request.body());
-//         int taskId = body["id"].get<int>();
+    TaskModel::Task task;
+    task.title = requestBody["title"];
+    task.description = requestBody.value("description", "");
+    task.priority = requestBody["priority"];
+    task.category = requestBody["category"];
+    task.deadline = requestBody["deadline"];
+    task.estimatedMinutes = requestBody["estimatedMinutes"];
+    task.completed = requestBody["completed"];
+    task.userId = requestBody["userId"];
 
-//         if (!taskModel.IsTaskExistsForUser(taskId, userId)) {
-//             response["code"] = kNotFoundStatusCode;
-//             response["message"] = "Task not found";
-//             return response;
-//         }
+    if (taskModel.CreateTaskForUser(task)) {
+        answer["code"] = kCreatedStatusCode;
+        answer["message"] = "Created";
+    }
 
-//         if (taskModel.DeleteTaskForUser(taskId, userId)) {
-//             response["code"] = kSuccessStatusCode;
-//             response["message"] = "Task deleted successfully";
-//         } else {
-//             response["code"] = kBadRequestStatusCode;
-//             response["message"] = "Failed to delete task";
-//         }
-//     } catch (const std::exception& e) {
-//         response["code"] = kBadRequestStatusCode;
-//         response["message"] = e.what();
-//     }
+    return {answer};
+}
 
-//     return response;
-// }
+View TaskController::UpdateTaskForUser(const Request& request) {
+    json answer;
+    json requestBody;
 
-// View TaskController::GetAllTasks(const Request& request) {
-//     json response;
-    
-//     try {
-//         int userId = ExtractUserIdFromRequest(request);
-//         auto tasks = taskModel.GetAllTasksForUser(userId);
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
 
-//         response["code"] = kSuccessStatusCode;
-//         response["message"] = "Success";
-//         response["tasks"] = json::array();
+    try {
+        requestBody = json::parse(request.body());
+    } catch (...) {
+        return {answer};
+    }
 
-//         for (const auto& task : tasks) {
-//             json taskJson;
-//             taskJson["id"] = task.id;
-//             taskJson["title"] = task.title;
-//             taskJson["description"] = task.description;
-//             taskJson["priority"] = task.priority;
-//             taskJson["category"] = task.category;
-//             taskJson["deadline"] = task.deadline;
-//             taskJson["estimatedMinutes"] = task.estimatedMinutes;
-//             taskJson["completed"] = task.completed;
-//             response["tasks"].push_back(taskJson);
-//         }
-//     } catch (const std::exception& e) {
-//         response["code"] = kBadRequestStatusCode;
-//         response["message"] = e.what();
-//     }
+    if (!requestBody.contains("id") || !requestBody.contains("title") ||
+        !requestBody.contains("priority") || !requestBody.contains("category") ||
+        !requestBody.contains("deadline") || !requestBody.contains("estimatedMinutes") ||
+        !requestBody.contains("completed") || !requestBody.contains("userId")) {
+        return {answer};
+    }
 
-//     return response;
-// }
+    TaskModel::Task task;
+    task.id = requestBody["id"];
+    task.title = requestBody["title"];
+    task.description = requestBody.value("description", "");
+    task.priority = requestBody["priority"];
+    task.category = requestBody["category"];
+    task.deadline = requestBody["deadline"];
+    task.estimatedMinutes = requestBody["estimatedMinutes"];
+    task.completed = requestBody["completed"];
+    task.userId = requestBody["userId"];
 
-// View TaskController::GetTasksByPriority(const Request& request) {
-//     json response;
-    
-//     try {
-//         int userId = ExtractUserIdFromRequest(request);
-//         json body = json::parse(request.body());
-//         int priority = body["priority"].get<int>();
+    if (taskModel.UpdateTaskForUser(task)) {
+        answer["code"] = kSuccessStatusCode;
+        answer["message"] = "Updated";
+    }
 
-//         auto tasks = taskModel.GetTasksByPriorityForUser(priority, userId);
+    return {answer};
+}
 
-//         response["code"] = kSuccessStatusCode;
-//         response["message"] = "Success";
-//         response["tasks"] = json::array();
+View TaskController::DeleteTaskForUser(const Request& request) {
+    json answer;
+    json requestBody;
 
-//         for (const auto& task : tasks) {
-//             json taskJson;
-//             taskJson["id"] = task.id;
-//             taskJson["title"] = task.title;
-//             taskJson["description"] = task.description;
-//             taskJson["priority"] = task.priority;
-//             taskJson["category"] = task.category;
-//             taskJson["deadline"] = task.deadline;
-//             taskJson["estimatedMinutes"] = task.estimatedMinutes;
-//             taskJson["completed"] = task.completed;
-//             response["tasks"].push_back(taskJson);
-//         }
-//     } catch (const std::exception& e) {
-//         response["code"] = kBadRequestStatusCode;
-//         response["message"] = e.what();
-//     }
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
 
-//     return response;
-// }
+    try {
+        requestBody = json::parse(request.body());
+    } catch (...) {
+        return {answer};
+    }
 
-// View TaskController::GetTasksByCategory(const Request& request) {
-//     json response;
-    
-//     try {
-//         int userId = ExtractUserIdFromRequest(request);
-//         json body = json::parse(request.body());
-//         int category = body["category"].get<int>();
+    if (!requestBody.contains("taskId") || !requestBody.contains("userId")) {
+        return {answer};
+    }
 
-//         auto tasks = taskModel.GetTasksByCategoryForUser(category, userId);
+    int taskId = requestBody["taskId"];
+    int userId = requestBody["userId"];
 
-//         response["code"] = kSuccessStatusCode;
-//         response["message"] = "Success";
-//         response["tasks"] = json::array();
+    if (taskModel.DeleteTaskForUser(taskId, userId)) {
+        answer["code"] = kSuccessStatusCode;
+        answer["message"] = "Deleted";
+    }
 
-//         for (const auto& task : tasks) {
-//             json taskJson;
-//             taskJson["id"] = task.id;
-//             taskJson["title"] = task.title;
-//             taskJson["description"] = task.description;
-//             taskJson["priority"] = task.priority;
-//             taskJson["category"] = task.category;
-//             taskJson["deadline"] = task.deadline;
-//             taskJson["estimatedMinutes"] = task.estimatedMinutes;
-//             taskJson["completed"] = task.completed;
-//             response["tasks"].push_back(taskJson);
-//         }
-//     } catch (const std::exception& e) {
-//         response["code"] = kBadRequestStatusCode;
-//         response["message"] = e.what();
-//     }
+    return {answer};
+}
 
-//     return response;
-// }
+View TaskController::GetTasksByPriorityForUser(const Request& request) {
+    json answer;
+    json requestBody;
+
+    try {
+        requestBody = json::parse(request.body());
+    } catch (...) {
+        answer["code"] = kBadRequestStatusCode;
+        answer["message"] = "Bad Request";
+        return {answer};
+    }
+
+    if (!requestBody.contains("priority") || !requestBody.contains("userId")) {
+        answer["code"] = kBadRequestStatusCode;
+        answer["message"] = "Missing fields";
+        return {answer};
+    }
+
+    int priority = requestBody["priority"];
+    int userId = requestBody["userId"];
+    auto tasks = taskModel.GetTasksByPriorityForUser(priority, userId);
+
+    json tasksJson;
+    ConvertTasksToJson(tasks, tasksJson);
+
+    answer["tasks"] = tasksJson;
+    answer["code"] = kSuccessStatusCode;
+    answer["message"] = "Success";
+
+    return {answer};
+}
+
+View TaskController::GetTasksByCategoryForUser(const Request& request) {
+    json answer;
+    json requestBody;
+
+    try {
+        requestBody = json::parse(request.body());
+    } catch (...) {
+        answer["code"] = kBadRequestStatusCode;
+        answer["message"] = "Bad Request";
+        return {answer};
+    }
+
+    if (!requestBody.contains("category") || !requestBody.contains("userId")) {
+        answer["code"] = kBadRequestStatusCode;
+        answer["message"] = "Missing fields";
+        return {answer};
+    }
+
+    int category = requestBody["category"];
+    int userId = requestBody["userId"];
+    auto tasks = taskModel.GetTasksByCategoryForUser(category, userId);
+
+    json tasksJson;
+    ConvertTasksToJson(tasks, tasksJson);
+
+    answer["tasks"] = tasksJson;
+    answer["code"] = kSuccessStatusCode;
+    answer["message"] = "Success";
+
+    return {answer};
+}
