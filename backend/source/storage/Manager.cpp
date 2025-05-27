@@ -13,12 +13,12 @@ namespace {
 const size_t kConnectionsCount = 5;
 
 std::string GetConnectionDataFromEnv() {
-    boost::process::environment env = Environment::LoadEnvironment();
+    boost::process::environment environment = Environment::Load();
 
-    const std::string kHost = env["DB_HOST"].to_string();
-    const std::string kDataBaseName = env["DB_NAME"].to_string();
-    const std::string kUser = env["DB_USER"].to_string();
-    const std::string kPassword = env["DB_PASSWORD"].to_string();
+    const std::string kHost = environment["DB_HOST"].to_string();
+    const std::string kDataBaseName = environment["DB_NAME"].to_string();
+    const std::string kUser = environment["DB_USER"].to_string();
+    const std::string kPassword = environment["DB_PASSWORD"].to_string();
 
     std::string kData = "host=" + kHost + " dbname=" + kDataBaseName + " user=" + kUser + " password=" + kPassword;
 

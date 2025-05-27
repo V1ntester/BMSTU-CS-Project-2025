@@ -8,5 +8,5 @@
 namespace Environment {
 const std::string kFilePath = ".env";
 
-boost::process::environment LoadEnvironment();
+boost::process::environment Load();
 }  // namespace Environment

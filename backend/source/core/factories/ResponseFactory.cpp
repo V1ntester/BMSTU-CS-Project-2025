@@ -1,6 +1,9 @@
 #include "ResponseFactory.hpp"
 
+#include <nlohmann/json.hpp>
+
 using namespace Core;
+using json = nlohmann::json;
 
 ResponseFactory::ResponseFactory() = default;
 
@@ -11,8 +14,15 @@ http::response<http::string_body> ResponseFactory::Make(Components::View view, h
 
     response.set(http::field::server, "BMSTU-project");
     response.set(http::field::content_type, "application/json");
+
+    json data = view.Get();
+
+    if (data.contains("code")) {
+        response.result(static_cast<size_t>(data["code"]));
+    }
+
     response.keep_alive(request.keep_alive());
-    response.body() = view.Get().dump();
+    response.body() = data.dump();
     response.prepare_payload();
 
     return response;

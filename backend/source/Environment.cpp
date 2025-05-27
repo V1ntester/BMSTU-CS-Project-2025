@@ -1,6 +1,6 @@
 #include "Environment.hpp"
 
-boost::process::environment Environment::LoadEnvironment() {
+boost::process::environment Environment::Load() {
     boost::process::environment env = boost::this_process::environment();
 
     std::ifstream file(Environment::kFilePath);
