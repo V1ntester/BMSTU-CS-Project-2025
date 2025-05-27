@@ -6,25 +6,21 @@
 
 namespace Components {
 
-class TaskController : public Controller {
+class TaskController {
 public:
     TaskController(TaskModel& taskModel, UserModel& userModel);
-    
-    ~TaskController() override;
+    ~TaskController();
 
-    // View CreateTask(const Request& request);
-    // View UpdateTask(const Request& request);
-    // View DeleteTask(const Request& request);
-    // View GetAllTasks(const Request& request);
-    // View GetTasksByPriority(const Request& request);
-    // View GetTasksByCategory(const Request& request);
+    View GetAllTasksForUser(const Request& request);
+    View CreateTaskForUser(const Request& request);
+    View UpdateTaskForUser(const Request& request);
+    View DeleteTaskForUser(const Request& request);
+    View GetTasksByPriorityForUser(const Request& request);
+    View GetTasksByCategoryForUser(const Request& request);
 
 private:
     TaskModel& taskModel;
     UserModel& userModel;
-
-    // int ExtractUserIdFromRequest(const Request& request) const;
-    // TaskModel::Task ParseTaskFromRequest(const Request& request, bool requireId = false) const;
 };
 
-}  // namespace Components
+} // namespace Components
