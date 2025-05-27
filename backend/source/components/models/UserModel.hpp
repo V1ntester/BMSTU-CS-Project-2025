@@ -11,6 +11,9 @@ class UserModel : public Model {
 
     ~UserModel() override;
 
+    size_t GetIdByLogin(std::string login) const;
+    bool GetVerifyByLogin(std::string login) const;
+
     bool IdentifyByLogin(std::string login) const;
     bool IdentifyByEmail(std::string email) const;
 

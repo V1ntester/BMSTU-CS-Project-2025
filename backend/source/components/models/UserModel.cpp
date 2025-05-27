@@ -39,6 +39,34 @@ UserModel::UserModel(Storage::Manager& storageManager) : Model(storageManager) {
 
 UserModel::~UserModel() = default;
 
+size_t UserModel::GetIdByLogin(std::string login) const {
+    Storage::Session session(this->storageManager);
+
+    pqxx::work transaction(session.Get());
+
+    size_t id = 0;
+
+    id = transaction.query_value<size_t>("SELECT id FROM \"Users\" WHERE login = $1", pqxx::params(login));
+
+    transaction.commit();
+
+    return id;
+}
+
+bool UserModel::GetVerifyByLogin(std::string login) const {
+    Storage::Session session(this->storageManager);
+
+    pqxx::work transaction(session.Get());
+
+    bool verify = false;
+
+    verify = transaction.query_value<bool>("SELECT verify FROM \"Users\" WHERE login = $1", pqxx::params(login));
+
+    transaction.commit();
+
+    return verify;
+}
+
 bool UserModel::IdentifyByLogin(std::string login) const {
     return this->CheckIfExistsByLogin(login);
 }
@@ -85,7 +113,7 @@ void UserModel::Restore(std::string code, std::string password) {
 
     std::string passwordHash = this->GeneratePasswordHash(password);
 
-    transaction.exec("UPDATE \"Users\" SET password_hash = $2 WHERE verification_code = $1", pqxx::params{code, passwordHash});
+    transaction.exec("UPDATE \"Users\" SET password_hash = $2, updated = true, updated_at = CURRENT_TIMESTAMP WHERE updating_code = $1 AND updated = false", pqxx::params{code, passwordHash});
 
     transaction.commit();
 }

@@ -9,8 +9,9 @@
 using namespace Components;
 
 namespace {
-const size_t kOKStatusCode = 200;
+// const size_t kOKStatusCode = 200;
 const size_t kCreatedStatusCode = 201;
+const size_t kAcceptedStatusCode = 202;
 const size_t kBadRequestStatusCode = 400;
 const size_t kForbiddenStatusCode = 403;
 const size_t kNotAcceptableStatusCode = 406;
@@ -49,8 +50,8 @@ View UserController::Authorize(const Request& request) {
         bool isAuthenticate = this->userModel.Authenticate(login, password);
 
         if (isAuthenticate) {
-            answer["code"] = kOKStatusCode;
-            answer["message"] = "OK";
+            answer["code"] = kAcceptedStatusCode;
+            answer["message"] = "Accepted";
 
             return answer;
         }
@@ -98,9 +99,99 @@ View UserController::Add(const Request& request) {
     return answer;
 }
 
-// View UserController::Delete(const Request& request) {
-// }
-// View UserController::Restore(const Request& request) {
-// }
-// View UserController::Verify(const Request& request) {
-// }
+View UserController::Delete(const Request& request) {
+    json answer;
+    json requestBody;
+
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
+
+    try {
+        requestBody = json::parse(request.body());
+    } catch (const std::exception& exception) {
+        return {answer};
+    }
+
+    if (!requestBody.contains("login") || !requestBody.contains("password")) {
+        return {answer};
+    }
+
+    std::string login = requestBody["login"];
+    std::string password = requestBody["password"];
+
+    bool isIndentify = this->userModel.IdentifyByLogin(login);
+
+
+    if (isIndentify) {
+        bool isAuthenticate = this->userModel.Authenticate(login, password);
+
+        if (isAuthenticate) {
+            userModel.Delete(login);
+
+            answer["code"] = kAcceptedStatusCode;
+            answer["message"] = "Accepted";
+
+            return answer;
+        }
+    }
+
+    answer["code"] = kForbiddenStatusCode;
+    answer["message"] = "Forbidden";
+
+    return {answer};
+}
+
+View UserController::Restore(const Request& request) {
+    json answer;
+    json requestBody;
+
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
+
+    try {
+        requestBody = json::parse(request.body());
+    } catch (const std::exception& exception) {
+        return {answer};
+    }
+
+    if (!requestBody.contains("code") || !requestBody.contains("password")) {
+        return {answer};
+    }
+
+    std::string code = requestBody["code"];
+    std::string password = requestBody["password"];
+
+    this->userModel.Restore(code, password);
+
+    answer["code"] = kAcceptedStatusCode;
+    answer["message"] = "Accepted";
+
+    return answer;
+}
+
+View UserController::Verify(const Request& request) {
+    json answer;
+    json requestBody;
+
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
+
+    try {
+        requestBody = json::parse(request.body());
+    } catch (const std::exception& exception) {
+        return {answer};
+    }
+
+    if (!requestBody.contains("code")) {
+        return {answer};
+    }
+
+    std::string code = requestBody["code"];
+
+    this->userModel.Verify(code);
+
+    answer["code"] = kAcceptedStatusCode;
+    answer["message"] = "Accepted";
+    
+    return answer;
+}

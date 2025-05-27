@@ -53,20 +53,38 @@ std::shared_ptr<pqxx::connection> Manager::GetConnection() {
 
     this->pool.pop();
 
+    while (!connection->is_open()) {
+        const std::string kConnectionData = GetConnectionDataFromEnv();
+
+        this->pool.push(std::make_shared<pqxx::connection>(kConnectionData));
+
+        std::shared_ptr<pqxx::connection> connection = this->pool.front();
+
+        this->pool.pop();
+    }
+
     return connection;
 }
 
 void Manager::ReturnConnection(std::shared_ptr<pqxx::connection> connection) {
-    if (connection->is_open()) {
-        pqxx::nontransaction nontransaction(*connection);
-        nontransaction.exec("DISCARD ALL");
+    try {
+        if (connection->is_open()) {
+            pqxx::nontransaction nontransaction(*connection);
+            nontransaction.exec("DISCARD ALL");
 
-        this->pool.push(connection);
-    } else {
-        connection->close();
+            nontransaction.commit();
 
-        const std::string kConnectionData = GetConnectionDataFromEnv();
+            this->pool.push(connection);
+        } else {
+            std::cerr << "Connection to DataBase was closed. Trying to reconnect\n";
 
-        this->pool.push(std::make_shared<pqxx::connection>(kConnectionData));
+            connection->close();
+
+            const std::string kConnectionData = GetConnectionDataFromEnv();
+
+            this->pool.push(std::make_shared<pqxx::connection>(kConnectionData));
+        }        
+    } catch (const std::exception& exception) {
+        std::cerr << "Error: " << exception.what() << "\n";
     }
 }
