@@ -10,6 +10,7 @@ namespace Components {
 class TaskModel : public Model {
 public:
     explicit TaskModel(Storage::Manager& storageManager);
+
     ~TaskModel() override;
 
     struct Task {
@@ -25,6 +26,7 @@ public:
     };
 
     std::vector<Task> GetAllTasksForUser(int userId);
+    
     bool CreateTaskForUser(const Task& task);
     bool UpdateTaskForUser(const Task& task);
     bool DeleteTaskForUser(int taskId, int userId);
