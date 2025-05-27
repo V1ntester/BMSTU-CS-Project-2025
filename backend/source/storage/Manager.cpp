@@ -57,5 +57,16 @@ std::shared_ptr<pqxx::connection> Manager::GetConnection() {
 }
 
 void Manager::ReturnConnection(std::shared_ptr<pqxx::connection> connection) {
-    this->pool.push(connection);
+    if (connection->is_open()) {
+        pqxx::nontransaction nontransaction(*connection);
+        nontransaction.exec("DISCARD ALL");
+
+        this->pool.push(connection);
+    } else {
+        connection->close();
+
+        const std::string kConnectionData = GetConnectionDataFromEnv();
+
+        this->pool.push(std::make_shared<pqxx::connection>(kConnectionData));
+    }
 }

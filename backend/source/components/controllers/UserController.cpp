@@ -10,8 +10,10 @@ using namespace Components;
 
 namespace {
 const size_t kOKStatusCode = 200;
+const size_t kCreatedStatusCode = 201;
 const size_t kBadRequestStatusCode = 400;
 const size_t kForbiddenStatusCode = 403;
+const size_t kNotAcceptableStatusCode = 406;
 }  // namespace
 
 UserController::UserController(UserModel& userModel) : userModel(userModel) {
@@ -41,7 +43,7 @@ View UserController::Authorize(const Request& request) {
 
     // Вот должна быть проверка этих строк, нормальные ли они (Длина, trim и прочее)
 
-    bool isIndentify = this->userModel.Identify(login);
+    bool isIndentify = this->userModel.IdentifyByLogin(login);
 
     if (isIndentify) {
         bool isAuthenticate = this->userModel.Authenticate(login, password);
@@ -60,8 +62,42 @@ View UserController::Authorize(const Request& request) {
     return {answer};
 }
 
-// View UserController::Add(const Request& request) {
-// }
+View UserController::Add(const Request& request) {
+    json answer;
+    json requestBody;
+
+    answer["code"] = kBadRequestStatusCode;
+    answer["message"] = "Bad Request";
+
+    try {
+        requestBody = json::parse(request.body());
+    } catch (const std::exception& exception) {
+        return {answer};
+    }
+
+    if (!requestBody.contains("login") || !requestBody.contains("email") || !requestBody.contains("password")) {
+        return {answer};
+    }
+
+    std::string login = requestBody["login"];
+    std::string email = requestBody["email"];
+    std::string password = requestBody["password"];
+
+    bool isIndentify = this->userModel.IdentifyByLogin(login) || this->userModel.IdentifyByEmail(email);
+
+    if (!isIndentify) {
+            this->userModel.Add(login, email, password);
+
+            answer["code"] = kCreatedStatusCode;
+            answer["message"] = "Created";
+    } else {
+            answer["code"] = kNotAcceptableStatusCode;
+            answer["message"] = "Not Acceptable";
+    }
+
+    return answer;
+}
+
 // View UserController::Delete(const Request& request) {
 // }
 // View UserController::Restore(const Request& request) {

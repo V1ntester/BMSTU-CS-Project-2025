@@ -11,8 +11,10 @@ class UserModel : public Model {
 
     ~UserModel() override;
 
-    bool Identify(std::string login);
-    bool Authenticate(std::string login, std::string password);
+    bool IdentifyByLogin(std::string login) const;
+    bool IdentifyByEmail(std::string email) const;
+
+    bool Authenticate(std::string login, std::string password) const;
 
     void Add(std::string login, std::string email, std::string password);
     void Delete(std::string login);
@@ -21,13 +23,13 @@ class UserModel : public Model {
     void Verify(std::string code);
 
  private:
-    std::string GeneratePasswordHash(std::string password);
+    std::string GeneratePasswordHash(std::string password) const;
 
-    std::string GeneratePrimaryVerificationCode();
-    std::string GeneratePrimaryUpdatingCode();
+    std::string GeneratePrimaryVerificationCode() const;
+    std::string GeneratePrimaryUpdatingCode() const;
 
-    bool CheckIfExistsByLogin(std::string login);
-    bool CheckIfExistsByEmail(std::string email);
-    bool ComparePasswordForLogin(std::string login, std::string password);
+    bool CheckIfExistsByLogin(std::string login) const;
+    bool CheckIfExistsByEmail(std::string email) const;
+    bool ComparePasswordForLogin(std::string login, std::string password) const;
 };
 }  // namespace Components

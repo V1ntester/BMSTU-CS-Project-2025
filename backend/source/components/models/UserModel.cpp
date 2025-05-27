@@ -39,11 +39,15 @@ UserModel::UserModel(Storage::Manager& storageManager) : Model(storageManager) {
 
 UserModel::~UserModel() = default;
 
-bool UserModel::Identify(std::string login) {
+bool UserModel::IdentifyByLogin(std::string login) const {
     return this->CheckIfExistsByLogin(login);
 }
 
-bool UserModel::Authenticate(std::string login, std::string password) {
+bool UserModel::IdentifyByEmail(std::string email) const{
+    return this->CheckIfExistsByEmail(email);
+}
+
+bool UserModel::Authenticate(std::string login, std::string password) const {
     return this->ComparePasswordForLogin(login, password);
 }
 
@@ -58,8 +62,7 @@ void UserModel::Add(std::string login, std::string email, std::string password) 
     std::string updatingCode = this->GeneratePrimaryUpdatingCode();
 
     transaction.exec(
-        "INSERT INTO \"Users\" (login, email, password_hash, verification_code, updating_code, created_at) VALUES ($1, $2, $3, $4, $5, "
-        "CURRENT_TIMESTAMP)",
+        "INSERT INTO \"Users\" (login, email, password_hash, verification_code, updating_code, created_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)",
         pqxx::params{login, email, passwordHash, verificationCode, updatingCode});
 
     transaction.commit();
@@ -97,7 +100,7 @@ void UserModel::Verify(std::string code) {
     transaction.commit();
 }
 
-std::string UserModel::GeneratePasswordHash(std::string password) {
+std::string UserModel::GeneratePasswordHash(std::string password) const {
     unsigned char hash[SHA256_DIGEST_LENGTH];
 
     SHA256_CTX sha256;
@@ -112,7 +115,7 @@ std::string UserModel::GeneratePasswordHash(std::string password) {
     return hexHash;
 }
 
-std::string UserModel::GeneratePrimaryVerificationCode() {
+std::string UserModel::GeneratePrimaryVerificationCode() const {
     std::string code;
 
     Storage::Session session(this->storageManager);
@@ -124,9 +127,7 @@ std::string UserModel::GeneratePrimaryVerificationCode() {
     while (count > 0) {
         code = GenerateRandomString(kVerificationCodeLength);
 
-        pqxx::work transaction(session.Get());
-
-        count = transaction.query_value<size_t>("SELECT COUNT(*) FROM \"Users\" WHERE verification_code = " + code);
+        count = transaction.query_value<size_t>("SELECT COUNT(*) FROM \"Users\" WHERE verification_code = $1", pqxx::params{code});
 
         transaction.commit();
     }
@@ -134,12 +135,10 @@ std::string UserModel::GeneratePrimaryVerificationCode() {
     return code;
 }
 
-std::string UserModel::GeneratePrimaryUpdatingCode() {
+std::string UserModel::GeneratePrimaryUpdatingCode() const {
     std::string code;
 
     Storage::Session session(this->storageManager);
-
-    pqxx::work transaction(session.Get());
 
     size_t count = 1;
 
@@ -148,7 +147,7 @@ std::string UserModel::GeneratePrimaryUpdatingCode() {
 
         pqxx::work transaction(session.Get());
 
-        count = transaction.query_value<size_t>("SELECT COUNT(*) FROM \"Users\" WHERE updating_code = " + code);
+        count = transaction.query_value<size_t>("SELECT COUNT(*) FROM \"Users\" WHERE updating_code = $1", pqxx::params{code});
 
         transaction.commit();
     }
@@ -156,7 +155,7 @@ std::string UserModel::GeneratePrimaryUpdatingCode() {
     return code;
 }
 
-bool UserModel::CheckIfExistsByLogin(std::string login) {
+bool UserModel::CheckIfExistsByLogin(std::string login) const {
     Storage::Session session(this->storageManager);
 
     pqxx::work transaction(session.Get());
@@ -168,7 +167,7 @@ bool UserModel::CheckIfExistsByLogin(std::string login) {
     return count > 0;
 }
 
-bool UserModel::CheckIfExistsByEmail(std::string email) {
+bool UserModel::CheckIfExistsByEmail(std::string email) const {
     Storage::Session session(this->storageManager);
 
     pqxx::work transaction(session.Get());
@@ -180,7 +179,7 @@ bool UserModel::CheckIfExistsByEmail(std::string email) {
     return count > 0;
 }
 
-bool UserModel::ComparePasswordForLogin(std::string login, std::string password) {
+bool UserModel::ComparePasswordForLogin(std::string login, std::string password) const {
     Storage::Session session(this->storageManager);
 
     pqxx::work transaction(session.Get());
