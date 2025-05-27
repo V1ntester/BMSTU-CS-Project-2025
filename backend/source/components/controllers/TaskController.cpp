@@ -1,4 +1,3 @@
-// TaskController.cpp
 #include "TaskController.hpp"
 #include <nlohmann/json.hpp>
 #include <string>
@@ -12,9 +11,9 @@ namespace {
 const size_t kSuccessStatusCode = 200;
 const size_t kCreatedStatusCode = 201;
 const size_t kBadRequestStatusCode = 400;
+const size_t kForbiddenStatusCode = 403;
 }
 
-// Вспомогательная функция сериализации Task в json
 void ConvertTasksToJson(const std::vector<TaskModel::Task>& tasks, json& outJsonArray) {
     for (const auto& task : tasks) {
         json taskJson;
@@ -26,7 +25,6 @@ void ConvertTasksToJson(const std::vector<TaskModel::Task>& tasks, json& outJson
         taskJson["deadline"] = task.deadline;
         taskJson["estimatedMinutes"] = task.estimatedMinutes;
         taskJson["completed"] = task.completed;
-        taskJson["userId"] = task.userId;
         outJsonArray.push_back(taskJson);
     }
 }
@@ -49,11 +47,20 @@ View TaskController::GetAllTasksForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("userId")) {
+    if (!requestBody.contains("login") || !requestBody.contains("password")) {
         return {answer};
     }
 
-    int userId = requestBody["userId"];
+    std::string login = requestBody["login"];
+    std::string password = requestBody["password"];
+
+    if (!userModel.IdentifyByLogin(login) || !userModel.Authenticate(login, password)) {
+        answer["code"] = kForbiddenStatusCode;
+        answer["message"] = "Forbidden";
+        return {answer};
+    }
+
+    size_t userId = userModel.GetIdByLogin(login);
     auto tasks = taskModel.GetAllTasksForUser(userId);
 
     json tasksJson;
@@ -82,10 +89,20 @@ View TaskController::CreateTaskForUser(const Request& request) {
     if (!requestBody.contains("title") || !requestBody.contains("priority") ||
         !requestBody.contains("category") || !requestBody.contains("deadline") ||
         !requestBody.contains("estimatedMinutes") || !requestBody.contains("completed") ||
-        !requestBody.contains("userId")) {
+        !requestBody.contains("login") || !requestBody.contains("password")) {
         return {answer};
     }
 
+    std::string login = requestBody["login"];
+    std::string password = requestBody["password"];
+
+    if (!userModel.IdentifyByLogin(login) || !userModel.Authenticate(login, password)) {
+        answer["code"] = kForbiddenStatusCode;
+        answer["message"] = "Forbidden";
+        return {answer};
+    }
+
+    size_t userId = userModel.GetIdByLogin(login);
     TaskModel::Task task;
     task.title = requestBody["title"];
     task.description = requestBody.value("description", "");
@@ -94,7 +111,7 @@ View TaskController::CreateTaskForUser(const Request& request) {
     task.deadline = requestBody["deadline"];
     task.estimatedMinutes = requestBody["estimatedMinutes"];
     task.completed = requestBody["completed"];
-    task.userId = requestBody["userId"];
+    task.userId = userId;
 
     if (taskModel.CreateTaskForUser(task)) {
         answer["code"] = kCreatedStatusCode;
@@ -120,10 +137,21 @@ View TaskController::UpdateTaskForUser(const Request& request) {
     if (!requestBody.contains("id") || !requestBody.contains("title") ||
         !requestBody.contains("priority") || !requestBody.contains("category") ||
         !requestBody.contains("deadline") || !requestBody.contains("estimatedMinutes") ||
-        !requestBody.contains("completed") || !requestBody.contains("userId")) {
+        !requestBody.contains("completed") || !requestBody.contains("login") ||
+        !requestBody.contains("password")) {
         return {answer};
     }
 
+    std::string login = requestBody["login"];
+    std::string password = requestBody["password"];
+
+    if (!userModel.IdentifyByLogin(login) || !userModel.Authenticate(login, password)) {
+        answer["code"] = kForbiddenStatusCode;
+        answer["message"] = "Forbidden";
+        return {answer};
+    }
+
+    size_t userId = userModel.GetIdByLogin(login);
     TaskModel::Task task;
     task.id = requestBody["id"];
     task.title = requestBody["title"];
@@ -133,7 +161,7 @@ View TaskController::UpdateTaskForUser(const Request& request) {
     task.deadline = requestBody["deadline"];
     task.estimatedMinutes = requestBody["estimatedMinutes"];
     task.completed = requestBody["completed"];
-    task.userId = requestBody["userId"];
+    task.userId = userId;
 
     if (taskModel.UpdateTaskForUser(task)) {
         answer["code"] = kSuccessStatusCode;
@@ -156,12 +184,22 @@ View TaskController::DeleteTaskForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("taskId") || !requestBody.contains("userId")) {
+    if (!requestBody.contains("taskId") || !requestBody.contains("login") || 
+        !requestBody.contains("password")) {
         return {answer};
     }
 
+    std::string login = requestBody["login"];
+    std::string password = requestBody["password"];
+
+    if (!userModel.IdentifyByLogin(login) || !userModel.Authenticate(login, password)) {
+        answer["code"] = kForbiddenStatusCode;
+        answer["message"] = "Forbidden";
+        return {answer};
+    }
+
+    size_t userId = userModel.GetIdByLogin(login);
     int taskId = requestBody["taskId"];
-    int userId = requestBody["userId"];
 
     if (taskModel.DeleteTaskForUser(taskId, userId)) {
         answer["code"] = kSuccessStatusCode;
@@ -183,14 +221,24 @@ View TaskController::GetTasksByPriorityForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("priority") || !requestBody.contains("userId")) {
+    if (!requestBody.contains("priority") || !requestBody.contains("login") || 
+        !requestBody.contains("password")) {
         answer["code"] = kBadRequestStatusCode;
         answer["message"] = "Missing fields";
         return {answer};
     }
 
+    std::string login = requestBody["login"];
+    std::string password = requestBody["password"];
+
+    if (!userModel.IdentifyByLogin(login) || !userModel.Authenticate(login, password)) {
+        answer["code"] = kForbiddenStatusCode;
+        answer["message"] = "Forbidden";
+        return {answer};
+    }
+
+    size_t userId = userModel.GetIdByLogin(login);
     int priority = requestBody["priority"];
-    int userId = requestBody["userId"];
     auto tasks = taskModel.GetTasksByPriorityForUser(priority, userId);
 
     json tasksJson;
@@ -215,14 +263,24 @@ View TaskController::GetTasksByCategoryForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("category") || !requestBody.contains("userId")) {
+    if (!requestBody.contains("category") || !requestBody.contains("login") || 
+        !requestBody.contains("password")) {
         answer["code"] = kBadRequestStatusCode;
         answer["message"] = "Missing fields";
         return {answer};
     }
 
+    std::string login = requestBody["login"];
+    std::string password = requestBody["password"];
+
+    if (!userModel.IdentifyByLogin(login) || !userModel.Authenticate(login, password)) {
+        answer["code"] = kForbiddenStatusCode;
+        answer["message"] = "Forbidden";
+        return {answer};
+    }
+
+    size_t userId = userModel.GetIdByLogin(login);
     int category = requestBody["category"];
-    int userId = requestBody["userId"];
     auto tasks = taskModel.GetTasksByCategoryForUser(category, userId);
 
     json tasksJson;

@@ -21,7 +21,6 @@ public:
 private:
     TaskModel& taskModel;
     UserModel& userModel;
-
 };
 
 } // namespace Components
