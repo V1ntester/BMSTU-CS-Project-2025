@@ -85,13 +85,13 @@ View UserController::Add(const Request& request) {
     bool isIndentify = this->userModel.IdentifyByLogin(login) || this->userModel.IdentifyByEmail(email);
 
     if (!isIndentify) {
-            this->userModel.Add(login, email, password);
+        this->userModel.Add(login, email, password);
 
-            answer["code"] = kCreatedStatusCode;
-            answer["message"] = "Created";
+        answer["code"] = kCreatedStatusCode;
+        answer["message"] = "Created";
     } else {
-            answer["code"] = kNotAcceptableStatusCode;
-            answer["message"] = "Not Acceptable";
+        answer["code"] = kNotAcceptableStatusCode;
+        answer["message"] = "Not Acceptable";
     }
 
     return answer;
@@ -118,7 +118,6 @@ View UserController::Delete(const Request& request) {
     std::string password = requestBody["password"];
 
     bool isIndentify = this->userModel.IdentifyByLogin(login);
-
 
     if (isIndentify) {
         bool isAuthenticate = this->userModel.Authenticate(login, password);
@@ -190,6 +189,6 @@ View UserController::Verify(const Request& request) {
 
     answer["code"] = kAcceptedStatusCode;
     answer["message"] = "Accepted";
-    
+
     return answer;
 }

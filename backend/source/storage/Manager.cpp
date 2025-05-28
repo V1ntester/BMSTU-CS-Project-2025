@@ -83,7 +83,7 @@ void Manager::ReturnConnection(std::shared_ptr<pqxx::connection> connection) {
             const std::string kConnectionData = GetConnectionDataFromEnv();
 
             this->pool.push(std::make_shared<pqxx::connection>(kConnectionData));
-        }        
+        }
     } catch (const std::exception& exception) {
         std::cerr << "Error: " << exception.what() << "\n";
     }

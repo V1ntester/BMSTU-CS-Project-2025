@@ -5,50 +5,22 @@
 
 using namespace Components;
 
-TaskModel::TaskModel(Storage::Manager& storageManager) : Model(storageManager) {}
+TaskModel::TaskModel(Storage::Manager& storageManager) : Model(storageManager) {
+}
 
 TaskModel::~TaskModel() = default;
 
-void TaskModel::ValidateTask(const Task& task) const {
-    if (task.title.empty()) {
-        throw std::invalid_argument("Task title cannot be empty");
-    }
-    if (task.priority < 1 || task.priority > 3) {
-        throw std::invalid_argument("Priority must be between 1 and 3");
-    }
-    if (task.category < 1 || task.category > 3) {
-        throw std::invalid_argument("Category must be between 1 and 3");
-    }
-    if (task.estimatedMinutes <= 0) {
-        throw std::invalid_argument("Estimated time must be positive");
-    }
-}
-
-void TaskModel::VerifyTaskOwnership(int taskId, size_t userId, pqxx::work& transaction) {
-    pqxx::result result = transaction.exec("SELECT userId FROM \"Tasks\" WHERE id = $1", pqxx::params{taskId});
-
-    if (result.empty()) {
-        throw std::runtime_error("Task not found");
-    }
-
-    if (result[0]["userId"].as<size_t>() != userId) {
-        throw std::runtime_error("Unauthorized task access");
-    }
-}
-
-bool TaskModel::IsTaskExistsForUser(int taskId, size_t userId) {
+bool TaskModel::IsExists(int taskId, size_t userId) {
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
 
-    pqxx::result result = transaction.exec(
-        "SELECT id FROM \"Tasks\" WHERE id = $1 AND userId = $2",
-        pqxx::params{taskId, userId});
+    pqxx::result result = transaction.exec("SELECT id FROM \"Tasks\" WHERE id = $1 AND userId = $2", pqxx::params{taskId, userId});
 
     transaction.commit();
     return !result.empty();
 }
 
-std::vector<TaskModel::Task> TaskModel::GetAllTasksForUser(size_t userId) {
+std::vector<TaskModel::Task> TaskModel::Get(size_t userId) {
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
 
@@ -73,8 +45,7 @@ std::vector<TaskModel::Task> TaskModel::GetAllTasksForUser(size_t userId) {
     return tasks;
 }
 
-bool TaskModel::CreateTaskForUser(const Task& task) {
-    ValidateTask(task);
+bool TaskModel::Add(const Task& task) {
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
 
@@ -82,45 +53,39 @@ bool TaskModel::CreateTaskForUser(const Task& task) {
         "INSERT INTO \"Tasks\" "
         "(title, description, priority, category, deadline, estimatedMinutes, completed, userId) "
         "VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
-        pqxx::params{task.title, task.description, task.priority, task.category, 
-                     task.deadline, task.estimatedMinutes, task.completed, task.userId});
+        pqxx::params{task.title, task.description, task.priority, task.category, task.deadline, task.estimatedMinutes, task.completed, task.userId});
 
     transaction.commit();
     return !result.empty();
 }
 
-bool TaskModel::UpdateTaskForUser(const Task& task) {
-    ValidateTask(task);
+bool TaskModel::Update(const Task& task) {
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
-
-    VerifyTaskOwnership(task.id, task.userId, transaction);
 
     pqxx::result result = transaction.exec(
         "UPDATE \"Tasks\" SET "
         "title = $1, description = $2, priority = $3, category = $4, "
         "deadline = $5, estimatedMinutes = $6, completed = $7 "
-        "WHERE id = $8 RETURNING id",
-        pqxx::params{task.title, task.description, task.priority, task.category, 
-                     task.deadline, task.estimatedMinutes, task.completed, task.id});
+        "WHERE id = $8 AND userid = $9 RETURNING id",
+        pqxx::params{task.title, task.description, task.priority, task.category, task.deadline, task.estimatedMinutes, task.completed, task.id,
+                     task.userId});
 
     transaction.commit();
     return !result.empty();
 }
 
-bool TaskModel::DeleteTaskForUser(int taskId, size_t userId) {
+bool TaskModel::Delete(int taskId, size_t userId) {
     Storage::Session session(this->storageManager);
     pqxx::work transaction(session.Get());
 
-    VerifyTaskOwnership(taskId, userId, transaction);
-
-    pqxx::result result = transaction.exec("DELETE FROM \"Tasks\" WHERE id = $1 RETURNING id", pqxx::params{taskId});
+    pqxx::result result = transaction.exec("DELETE FROM \"Tasks\" WHERE id = $1 AND userid = $2 RETURNING id", pqxx::params{taskId, userId});
 
     transaction.commit();
     return !result.empty();
 }
 
-std::vector<TaskModel::Task> TaskModel::GetTasksByPriorityForUser(int priority, size_t userId) {
+std::vector<TaskModel::Task> TaskModel::GetByPriority(int priority, size_t userId) {
     if (priority < 1 || priority > 3) {
         throw std::invalid_argument("Priority must be between 1 and 3");
     }
@@ -149,7 +114,7 @@ std::vector<TaskModel::Task> TaskModel::GetTasksByPriorityForUser(int priority, 
     return tasks;
 }
 
-std::vector<TaskModel::Task> TaskModel::GetTasksByCategoryForUser(int category, size_t userId) {
+std::vector<TaskModel::Task> TaskModel::GetByCategory(int category, size_t userId) {
     if (category < 1 || category > 3) {
         throw std::invalid_argument("Category must be between 1 and 3");
     }

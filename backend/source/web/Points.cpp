@@ -23,16 +23,16 @@ std::shared_ptr<Routes::Route> points[11]{
                                    []([[maybe_unused]] const auto& request) -> Components::View { return Web::userController.Verify(request); }),
     // Task routes
     std::make_shared<Routes::Get>("/tasks",
-                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.GetAllTasksForUser(request); }),
+                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.Get(request); }),
     std::make_shared<Routes::Post>("/task",
-                                   []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.CreateTaskForUser(request); }),
+                                   []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.Add(request); }),
     std::make_shared<Routes::Put>("/task",
-                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.UpdateTaskForUser(request); }),
+                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.Update(request); }),
     std::make_shared<Routes::Delete>("/task",
-                                     []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.DeleteTaskForUser(request); }),
+                                     []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.Delete(request); }),
     std::make_shared<Routes::Get>("/tasks/priority",
-                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.GetTasksByPriorityForUser(request); }),
+                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.GetByPriority(request); }),
     std::make_shared<Routes::Get>("/tasks/category",
-                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.GetTasksByCategoryForUser(request); })
+                                  []([[maybe_unused]] const auto& request) -> Components::View { return Web::taskController.GetByCategory(request); })
 };
 }  // namespace Web

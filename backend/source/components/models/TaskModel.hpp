@@ -8,7 +8,7 @@
 namespace Components {
 
 class TaskModel : public Model {
-public:
+ public:
     explicit TaskModel(Storage::Manager& storageManager);
 
     ~TaskModel() override;
@@ -25,17 +25,17 @@ public:
         size_t userId;
     };
 
-    std::vector<Task> GetAllTasksForUser(size_t userId);
-    bool CreateTaskForUser(const Task& task);
-    bool UpdateTaskForUser(const Task& task);
-    bool DeleteTaskForUser(int taskId, size_t userId);
-    std::vector<Task> GetTasksByPriorityForUser(int priority, size_t userId);
-    std::vector<Task> GetTasksByCategoryForUser(int category, size_t userId);
-    bool IsTaskExistsForUser(int taskId, size_t userId);
+    std::vector<Task> Get(size_t userId);
+    std::vector<Task> GetByPriority(int priority, size_t userId);
+    std::vector<Task> GetByCategory(int category, size_t userId);
 
-private:
-    void ValidateTask(const Task& task) const;
-    void VerifyTaskOwnership(int taskId, size_t userId, pqxx::work& transaction);
+    bool Add(const Task& task);
+    bool Delete(int taskId, size_t userId);
+
+    bool Update(const Task& task);
+
+ private:
+    bool IsExists(int taskId, size_t userId);
 };
 
 }  // namespace Components

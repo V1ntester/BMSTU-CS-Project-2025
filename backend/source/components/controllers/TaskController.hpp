@@ -7,20 +7,24 @@
 namespace Components {
 
 class TaskController {
-public:
+ public:
     TaskController(TaskModel& taskModel, UserModel& userModel);
+
     ~TaskController();
 
-    View GetAllTasksForUser(const Request& request);
-    View CreateTaskForUser(const Request& request);
-    View UpdateTaskForUser(const Request& request);
-    View DeleteTaskForUser(const Request& request);
-    View GetTasksByPriorityForUser(const Request& request);
-    View GetTasksByCategoryForUser(const Request& request);
+    View Get(const Request& request);
+    View GetByPriority(const Request& request);
+    View GetByCategory(const Request& request);
 
-private:
+    View Add(const Request& request);
+
+    View Delete(const Request& request);
+
+    View Update(const Request& request);
+
+ private:
     TaskModel& taskModel;
     UserModel& userModel;
 };
 
-} // namespace Components
+}  // namespace Components

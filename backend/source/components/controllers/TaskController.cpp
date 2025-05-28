@@ -1,7 +1,7 @@
 #include "TaskController.hpp"
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <string>
-#include <algorithm>
 #include "pqxx/pqxx"
 
 using namespace Components;
@@ -12,11 +12,31 @@ const size_t kSuccessStatusCode = 200;
 const size_t kCreatedStatusCode = 201;
 const size_t kBadRequestStatusCode = 400;
 const size_t kForbiddenStatusCode = 403;
-}
+
+// bool isWrong(const TaskModel::Task& task) {
+//     if (task.title.empty()) {
+//         return true;
+//     }
+
+//     if (task.priority < 1 || task.priority > 3) {
+//         return true;
+//     }
+
+//     if (task.category < 1 || task.category > 3) {
+//         return true;
+//     }
+
+//     if (task.estimatedMinutes <= 0) {
+//         return true;
+//     }
+
+//     return false;
+// }
 
 void ConvertTasksToJson(const std::vector<TaskModel::Task>& tasks, json& outJsonArray) {
     for (const auto& task : tasks) {
         json taskJson;
+
         taskJson["id"] = task.id;
         taskJson["title"] = task.title;
         taskJson["description"] = task.description;
@@ -25,16 +45,18 @@ void ConvertTasksToJson(const std::vector<TaskModel::Task>& tasks, json& outJson
         taskJson["deadline"] = task.deadline;
         taskJson["estimatedMinutes"] = task.estimatedMinutes;
         taskJson["completed"] = task.completed;
+
         outJsonArray.push_back(taskJson);
     }
 }
+}  // namespace
 
-TaskController::TaskController(TaskModel& taskModel, UserModel& userModel)
-    : taskModel(taskModel), userModel(userModel) {}
+TaskController::TaskController(TaskModel& taskModel, UserModel& userModel) : taskModel(taskModel), userModel(userModel) {
+}
 
 TaskController::~TaskController() = default;
 
-View TaskController::GetAllTasksForUser(const Request& request) {
+View TaskController::Get(const Request& request) {
     json answer;
     json requestBody;
 
@@ -61,7 +83,7 @@ View TaskController::GetAllTasksForUser(const Request& request) {
     }
 
     size_t userId = userModel.GetIdByLogin(login);
-    auto tasks = taskModel.GetAllTasksForUser(userId);
+    auto tasks = taskModel.Get(userId);
 
     json tasksJson;
     ConvertTasksToJson(tasks, tasksJson);
@@ -73,7 +95,7 @@ View TaskController::GetAllTasksForUser(const Request& request) {
     return {answer};
 }
 
-View TaskController::CreateTaskForUser(const Request& request) {
+View TaskController::Add(const Request& request) {
     json answer;
     json requestBody;
 
@@ -86,9 +108,8 @@ View TaskController::CreateTaskForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("title") || !requestBody.contains("priority") ||
-        !requestBody.contains("category") || !requestBody.contains("deadline") ||
-        !requestBody.contains("estimatedMinutes") || !requestBody.contains("completed") ||
+    if (!requestBody.contains("title") || !requestBody.contains("priority") || !requestBody.contains("category") ||
+        !requestBody.contains("deadline") || !requestBody.contains("estimatedMinutes") || !requestBody.contains("completed") ||
         !requestBody.contains("login") || !requestBody.contains("password")) {
         return {answer};
     }
@@ -113,7 +134,7 @@ View TaskController::CreateTaskForUser(const Request& request) {
     task.completed = requestBody["completed"];
     task.userId = userId;
 
-    if (taskModel.CreateTaskForUser(task)) {
+    if (taskModel.Add(task)) {
         answer["code"] = kCreatedStatusCode;
         answer["message"] = "Created";
     }
@@ -121,7 +142,7 @@ View TaskController::CreateTaskForUser(const Request& request) {
     return {answer};
 }
 
-View TaskController::UpdateTaskForUser(const Request& request) {
+View TaskController::Update(const Request& request) {
     json answer;
     json requestBody;
 
@@ -134,11 +155,9 @@ View TaskController::UpdateTaskForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("id") || !requestBody.contains("title") ||
-        !requestBody.contains("priority") || !requestBody.contains("category") ||
-        !requestBody.contains("deadline") || !requestBody.contains("estimatedMinutes") ||
-        !requestBody.contains("completed") || !requestBody.contains("login") ||
-        !requestBody.contains("password")) {
+    if (!requestBody.contains("id") || !requestBody.contains("title") || !requestBody.contains("priority") || !requestBody.contains("category") ||
+        !requestBody.contains("deadline") || !requestBody.contains("estimatedMinutes") || !requestBody.contains("completed") ||
+        !requestBody.contains("login") || !requestBody.contains("password")) {
         return {answer};
     }
 
@@ -152,7 +171,9 @@ View TaskController::UpdateTaskForUser(const Request& request) {
     }
 
     size_t userId = userModel.GetIdByLogin(login);
+
     TaskModel::Task task;
+
     task.id = requestBody["id"];
     task.title = requestBody["title"];
     task.description = requestBody.value("description", "");
@@ -163,7 +184,7 @@ View TaskController::UpdateTaskForUser(const Request& request) {
     task.completed = requestBody["completed"];
     task.userId = userId;
 
-    if (taskModel.UpdateTaskForUser(task)) {
+    if (taskModel.Update(task)) {
         answer["code"] = kSuccessStatusCode;
         answer["message"] = "Updated";
     }
@@ -171,7 +192,7 @@ View TaskController::UpdateTaskForUser(const Request& request) {
     return {answer};
 }
 
-View TaskController::DeleteTaskForUser(const Request& request) {
+View TaskController::Delete(const Request& request) {
     json answer;
     json requestBody;
 
@@ -184,8 +205,7 @@ View TaskController::DeleteTaskForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("taskId") || !requestBody.contains("login") || 
-        !requestBody.contains("password")) {
+    if (!requestBody.contains("taskId") || !requestBody.contains("login") || !requestBody.contains("password")) {
         return {answer};
     }
 
@@ -201,7 +221,7 @@ View TaskController::DeleteTaskForUser(const Request& request) {
     size_t userId = userModel.GetIdByLogin(login);
     int taskId = requestBody["taskId"];
 
-    if (taskModel.DeleteTaskForUser(taskId, userId)) {
+    if (taskModel.Delete(taskId, userId)) {
         answer["code"] = kSuccessStatusCode;
         answer["message"] = "Deleted";
     }
@@ -209,7 +229,7 @@ View TaskController::DeleteTaskForUser(const Request& request) {
     return {answer};
 }
 
-View TaskController::GetTasksByPriorityForUser(const Request& request) {
+View TaskController::GetByPriority(const Request& request) {
     json answer;
     json requestBody;
 
@@ -221,8 +241,7 @@ View TaskController::GetTasksByPriorityForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("priority") || !requestBody.contains("login") || 
-        !requestBody.contains("password")) {
+    if (!requestBody.contains("priority") || !requestBody.contains("login") || !requestBody.contains("password")) {
         answer["code"] = kBadRequestStatusCode;
         answer["message"] = "Missing fields";
         return {answer};
@@ -239,7 +258,7 @@ View TaskController::GetTasksByPriorityForUser(const Request& request) {
 
     size_t userId = userModel.GetIdByLogin(login);
     int priority = requestBody["priority"];
-    auto tasks = taskModel.GetTasksByPriorityForUser(priority, userId);
+    auto tasks = taskModel.GetByPriority(priority, userId);
 
     json tasksJson;
     ConvertTasksToJson(tasks, tasksJson);
@@ -251,7 +270,7 @@ View TaskController::GetTasksByPriorityForUser(const Request& request) {
     return {answer};
 }
 
-View TaskController::GetTasksByCategoryForUser(const Request& request) {
+View TaskController::GetByCategory(const Request& request) {
     json answer;
     json requestBody;
 
@@ -263,8 +282,7 @@ View TaskController::GetTasksByCategoryForUser(const Request& request) {
         return {answer};
     }
 
-    if (!requestBody.contains("category") || !requestBody.contains("login") || 
-        !requestBody.contains("password")) {
+    if (!requestBody.contains("category") || !requestBody.contains("login") || !requestBody.contains("password")) {
         answer["code"] = kBadRequestStatusCode;
         answer["message"] = "Missing fields";
         return {answer};
@@ -281,7 +299,7 @@ View TaskController::GetTasksByCategoryForUser(const Request& request) {
 
     size_t userId = userModel.GetIdByLogin(login);
     int category = requestBody["category"];
-    auto tasks = taskModel.GetTasksByCategoryForUser(category, userId);
+    auto tasks = taskModel.GetByCategory(category, userId);
 
     json tasksJson;
     ConvertTasksToJson(tasks, tasksJson);

@@ -71,7 +71,7 @@ bool UserModel::IdentifyByLogin(std::string login) const {
     return this->CheckIfExistsByLogin(login);
 }
 
-bool UserModel::IdentifyByEmail(std::string email) const{
+bool UserModel::IdentifyByEmail(std::string email) const {
     return this->CheckIfExistsByEmail(email);
 }
 
@@ -90,7 +90,8 @@ void UserModel::Add(std::string login, std::string email, std::string password) 
     std::string updatingCode = this->GeneratePrimaryUpdatingCode();
 
     transaction.exec(
-        "INSERT INTO \"Users\" (login, email, password_hash, verification_code, updating_code, created_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)",
+        "INSERT INTO \"Users\" (login, email, password_hash, verification_code, updating_code, created_at) VALUES ($1, $2, $3, $4, $5, "
+        "CURRENT_TIMESTAMP)",
         pqxx::params{login, email, passwordHash, verificationCode, updatingCode});
 
     transaction.commit();
@@ -113,7 +114,9 @@ void UserModel::Restore(std::string code, std::string password) {
 
     std::string passwordHash = this->GeneratePasswordHash(password);
 
-    transaction.exec("UPDATE \"Users\" SET password_hash = $2, updated = true, updated_at = CURRENT_TIMESTAMP WHERE updating_code = $1 AND updated = false", pqxx::params{code, passwordHash});
+    transaction.exec(
+        "UPDATE \"Users\" SET password_hash = $2, updated = true, updated_at = CURRENT_TIMESTAMP WHERE updating_code = $1 AND updated = false",
+        pqxx::params{code, passwordHash});
 
     transaction.commit();
 }
