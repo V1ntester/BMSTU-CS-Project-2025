@@ -214,3 +214,4 @@ _deps
 # Additional
 build*/
 *.env
+*database/init.sh
